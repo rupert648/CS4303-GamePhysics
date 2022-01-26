@@ -1,9 +1,11 @@
 final class Floor {
 
   private int floorHeight;
+  private float mu;  // coefficient of friction
   
-  public Floor(int floorHeight) {
+  public Floor(int floorHeight, float mu) {
     this.floorHeight = floorHeight;
+    this.mu = mu;
   }
   
   public void draw() {
@@ -16,5 +18,6 @@ final class Floor {
   
   // getters
   public int getHeight() { return floorHeight; }
+  public float getMu() { return mu; }
   
 }

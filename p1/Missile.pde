@@ -25,7 +25,7 @@ final class Missile {
     float distY = mouseY - closestBallistaY ;
     
     // direction is used to calc initial speed (but it is just the speed normalised)
-    direction = new PVector(distX, distY);
+    direction = new PVector(distX, distY);  
     direction.normalize();
   }
   
@@ -53,9 +53,18 @@ final class Missile {
   void updateSpeed(float gravityForce, float dragForce, Floor floor) {
     
     // check collision with floor
-    if (collidingWithFloor(floor)) bounce();
-    if (speed.y == 0) return;
+    if (collidingWithFloor(floor)) {
+      bounceFloor();
+      // if we have bounced a lot, don't update the speed anymore
+      // prevents gravity affecting ball once on the ground
+      if (speed.y == 0) {
+        computeFriction(floor);      
+        return;
+      };
+    };
     
+    if (collidingWithWall()) bounceWall();
+   
     // update due to gravity
     speed.y += gravityForce;
     
@@ -92,7 +101,11 @@ final class Missile {
     return position.y >= floorCollisionPosition;
   }
   
-  void bounce() {
+  boolean collidingWithWall() {
+    return position.x >= width || position.x <= 0;
+  }
+  
+  void bounceFloor() {
     // if speed.y < certain amount then stop bouncing
     if (speed.y < 0.05) {
       speed.y = 0;
@@ -100,5 +113,36 @@ final class Missile {
     }
     // trying to reverse y
     speed.y = speed.y * -1;
+  }
+  
+  void bounceWall() {
+    // if very low speed to stop odd behaviour just set to 0
+    if (speed.x < 0.05 && speed.x > 0) { speed.x = 0; return; }
+    else if (speed.x > -0.05 && speed.x < 0) { speed.x = 0; return; }
+    
+    // reverse speed
+    speed.x = speed.x * -1;
+  }
+  
+  void computeFriction(Floor floor) {
+    if (speed.x == 0) return;
+    // if speed very low stop ball
+    else if (speed.x < 0.05 && speed.x > 0) { speed.x = 0; return; }
+    else if (speed.x > -0.05 && speed.x < 0) { speed.x = 0; return; }
+    // friction force constant no matter mass
+    // proportional to frictional constant of floor
+    
+    // acceleration is in opposite direction to x speed
+    float a = floor.getMu();
+    // change in velocity = a * some time difference
+    float accelTime = 0.1;
+    float vDiff = accelTime * a;
+    
+    if (speed.x < 0) {
+      speed.x += vDiff;
+    } else {
+      speed.x -= vDiff;
+    }
+       
   }
 }

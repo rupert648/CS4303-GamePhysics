@@ -2,6 +2,7 @@
 import java.util.*;
 // WORLD CONSTANTS
 final int FLOOR_HEIGHT = 75;
+final float FRICTION_CONSTANT = 0.5;
 
 // BALLISTA CONSTANTS
 final int numberOfBallistae = 3;
@@ -44,7 +45,7 @@ void setup() {
   // initialise the Hud;
   hud = new Hud(width - 150, 50);
   // initialise floor
-  floor = new Floor(FLOOR_HEIGHT);
+  floor = new Floor(FLOOR_HEIGHT, FRICTION_CONSTANT);
   // initialise cursor crosshair
   cursor(CROSS);
   // initialise the ballistae
