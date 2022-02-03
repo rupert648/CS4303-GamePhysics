@@ -74,7 +74,7 @@ void draw() {
  
  clickLength = System.currentTimeMillis();
  
- hud.draw(gamestate.getWave(), clickLength - startClick, mouseDown);
+ hud.draw(gamestate.getWave(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
  floor.draw();
  drawBallistae();
  drawLine();
@@ -126,7 +126,11 @@ void keyPressed() {
       break;
     case EXPLODE_KEY:
       if (toBlowUpIndex < missiles.size()) {
-        missiles.get(toBlowUpIndex++).explode();
+        missiles.get(toBlowUpIndex).explode();
+
+        missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
+        
+        toBlowUpIndex++;
       }
       break;
   }
@@ -200,7 +204,10 @@ void drawMissiles() {
 
 void drawMeteors() {
   for (int i = 0; i < meteors.size(); i++) {
+    meteors.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag(), floor);
+
     meteors.get(i).move();
+    
     meteors.get(i).draw();
   }
 }

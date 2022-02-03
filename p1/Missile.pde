@@ -184,4 +184,14 @@ final class Missile {
     exploded = true;
     setExplosionLocation();
   }
+
+  void checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
+
+    for (int i = 0; i < meteors.size(); i++) {
+      if (meteors.get(i).inImpactArea(position, EXPLOSION_RADIUS)) {
+        meteors.get(i).destroy();
+      }
+    }
+
+  }
 }

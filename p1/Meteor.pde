@@ -3,12 +3,27 @@ final class Meteor {
     // CONSTANTS
     float METEOR_RADIUS = 10;
     float METEOR_TRAIL_LENGTH = 50;
+    int TRAIL_LENGTH = 50;
+    final float EXPLOSION_RADIUS = 60;  // max size of the explosion
+    final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
     
     PVector position;
     PVector velocity;
 
+    PVector[] trail = new PVector[TRAIL_LENGTH];
+
+    // explosion
+    PVector explosionPosition;
+    boolean isDestroyed = false;
+    boolean explosionAnimationCompleted = false;
+    float explosionCurrentRadius = 0;
+
     public Meteor(int x, int y) {
         position = new PVector(x, y);
+        // set trail
+        for (int i = 0; i < TRAIL_LENGTH; i++) {
+            trail[i] = new PVector(x,y);
+        }
     }
 
     public void setInitialSpeed(GameState gs, Floor floor) {
@@ -47,31 +62,124 @@ final class Meteor {
             hitsFloor = newTheta < maxTheta;
         }
 
-        // set direction
-        randXDir = left ? randXDir * -1.0 : randXDir;
+        // set direction - 
+        randXDir = left ? randXDir * -1.0: randXDir;
+        // add horizontal speed to account for gravity
+        // this makes them more "loopy"
+        if (left) {
+            if (position.x > height / 2) {
+                randXDir -= 3;
+            }
+        } else {
+            if (position.x < height / 2) {
+                randXDir += 3;
+            }
+        }
 
         velocity = new PVector(randXDir, randYDir);    
 
         // set speed
-        float speed = 5.0 + gs.getWave();
+        float speed = 0.1 + gs.getWave()*0.5;
         // speed +- 20%
         float multiplier = 0.8 + rand.nextFloat() * 0.4;
         speed = speed * multiplier;
-        
+
         velocity.mult(speed);    
     }
 
+    public void updateSpeed(float gravityForce, float dragForce, Floor floor) {
+        if (isDestroyed) return;
+
+        if (collidingWithFloor(floor)) {
+            destroy();
+            return;
+        }
+
+        // apply less gravity to meteors -> better for gameplay
+        velocity.y += gravityForce*0.01;
+
+        // force acts parallel (and opposite) to the direction of travel
+        // magnitude of force is also dependent on the current speed
+
+        // TODO: mess with drag coefficients to make it fun for meteors
+        // PVector drag = velocity.copy().mult(-1 * dragForce);
+
+        // velocity.y += drag.y;
+        // velocity.x += drag.x;
+    }
+
     public void move() {
+        if (isDestroyed) return;
+
+        updateTrail();
+
         position.x += velocity.x;
         position.y += velocity.y;
     }
 
+    public void updateTrail() {
+        for (int i = TRAIL_LENGTH-1; i > 0; i--) {
+            trail[i] = trail[i-1];
+        }
+
+        trail[0] = position.copy();
+    }
+
     public void draw() {
+        if (isDestroyed) {
+            if (!explosionAnimationCompleted) {
+                drawExplosion();
+            }
+
+            return;
+        }
+
         fill(255, 0, 0);
         circle(position.x, position.y, METEOR_RADIUS);
+
+        drawTrail();
+    }
+
+    public void drawTrail() {
+        for (int i = 0 ; i < TRAIL_LENGTH; i++) {
+            fill(255, 255, 0);
+            circle(trail[i].x, trail[i].y, METEOR_RADIUS / 5);
+        }
+    }
+
+    void drawExplosion() {
+        if (explosionCurrentRadius >= EXPLOSION_RADIUS) {
+            explosionAnimationCompleted = true;
+            return;
+        }
+
+        explosionCurrentRadius += EXPLOSION_EXPANSION_RATE;
+        fill(0, 255, 0);
+        circle(explosionPosition.x, explosionPosition.y, explosionCurrentRadius);
     }
 
     public float getHeight(Floor floor) {
         return floor.getHeight() - position.y;
+    }
+
+    boolean collidingWithFloor(Floor floor) {
+        int floorCollisionPosition = height - floor.getHeight() + 10;
+        
+        return position.y >= floorCollisionPosition;
+    }
+
+    boolean inImpactArea(PVector missilePos, float explosionRadius) {
+        // if in circle around missilePos of explosion Radius then destroy it
+        float distance = missilePos.dist(position);
+        return distance < explosionRadius;
+    }
+
+    void destroy() {
+        isDestroyed = true;
+        setExplosionLocation();
+    }
+
+    void setExplosionLocation() {
+        explosionPosition = position.copy();
     }
 }

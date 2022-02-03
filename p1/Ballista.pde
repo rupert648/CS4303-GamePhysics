@@ -29,4 +29,8 @@ final class Ballista {
     ammo--;
     return true;
   }
+
+  public boolean isOutOfAmmo() {
+    return ammo <= 0;
+  }
 }
