@@ -2,6 +2,8 @@ final class Missile {
   
   // constants
   final float LAUNCH_TIME = 1.6;  // the time for which the missile is being launched from the slingshot
+  final float EXPLOSION_RADIUS = 60;  // max size of the explosion
+  final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
   
   // The missile is represented by another handsome rectangle
   // the position field indicates the top-left of that rectangle.  
@@ -12,7 +14,13 @@ final class Missile {
   // movement
   PVector direction;
   PVector speed;
-  
+
+  // explosion
+  PVector explosionPosition;
+  boolean exploded = false;
+  boolean explosionAnimationCompleted = false;
+  float explosionCurrentRadius = 0;
+
   public Missile(int x, int y, int missileWidth, int missileHeight, float mass) {
     position = new PVector(x, y) ;
     this.missileWidth = missileWidth ;
@@ -28,16 +36,7 @@ final class Missile {
     direction = new PVector(distX, distY);  
     direction.normalize();
   }
-  
-  // getters
-  int getX() {return (int)position.x ;}
-  int getY() {return (int)position.y ;}
-  // The missile is displayed as a rectangle
-  void draw() {
-    fill(200) ;
-    rect(position.x, position.y, missileWidth, missileHeight) ;
-  }
-  
+
   void setInitialSpeed(float initialForce) {
     // force will occur in the direction we are aiming
     // a = f / m
@@ -48,6 +47,41 @@ final class Missile {
     
     speed = direction.copy();
     speed = speed.mult(speedIncrease);
+  }
+
+  public void setExplosionLocation() {
+    explosionPosition = position.copy();
+  }
+  
+  // getters
+  int getX() {return (int)position.x ;}
+  int getY() {return (int)position.y ;}
+  // The missile is displayed as a rectangle
+  void draw() {
+    if (exploded) {
+      if (!explosionAnimationCompleted) {
+        drawExplosion();
+      }
+
+      return;
+    };
+
+
+    fill(200) ;
+    rect(position.x, position.y, missileWidth, missileHeight) ;
+  }
+
+  void drawExplosion() {
+    // check if reached max size
+    if (explosionCurrentRadius >= EXPLOSION_RADIUS) {
+      explosionAnimationCompleted = true;
+      return;
+    }
+
+    explosionCurrentRadius += EXPLOSION_EXPANSION_RATE;
+    fill(255, 255, 0);
+    circle(explosionPosition.x, explosionPosition.y, explosionCurrentRadius);
+
   }
   
   void updateSpeed(float gravityForce, float dragForce, Floor floor) {
@@ -144,5 +178,10 @@ final class Missile {
       speed.x -= vDiff;
     }
        
+  }
+
+  void explode() {
+    exploded = true;
+    setExplosionLocation();
   }
 }
