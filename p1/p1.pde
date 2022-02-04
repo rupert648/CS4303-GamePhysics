@@ -26,7 +26,6 @@ final float LAUNCH_FORCE_MULTIPLER = 0.1;
 // CONTROL CONSTANTS
 final char EXPLODE_KEY = ' ';
 
-
 // Game Items
 GameState gamestate;
 Hud hud;
@@ -77,20 +76,30 @@ void setup() {
 
 // update and render
 void draw() {
- background(0);
- 
- clickLength = System.currentTimeMillis();
- 
- hud.draw(gamestate.getWave(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
- floor.draw();
- drawBallistae();
- drawLine();
- drawMissiles();
- drawMeteors();
+  // reset background to remove previous frame drawings
+  background(0);
 
- if (blowingUpMissiles) {
-   blowUpMissilesOnScreen();
- }
+  if (waveFinished()) {
+    // new wave
+    textSize(128);
+    text("WAVE "+gamestate.getWave()+" FINISHED", width/2, height/2);
+    nextWave();
+    return;
+  }
+  
+  // standard wave rendering
+  clickLength = System.currentTimeMillis();
+  
+  hud.draw(gamestate.getWave(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
+  floor.draw();
+  drawBallistae();
+  drawLine();
+  drawMissiles();
+  drawMeteors();
+
+  if (blowingUpMissiles) {
+    blowUpMissilesOnScreen();
+  }
 }
 
 void mousePressed() {
@@ -242,8 +251,12 @@ void initialiseWave() {
     Random rand = new Random();
 
     int xPos = rand.nextInt(width);
-    // start off screen
-    int yPos = 20;
+    
+    // give random start pos above the screen
+    // therefore gives "impression" of coming in spread out
+    // rather than all at once
+    int yPosAboveScreen = rand.nextInt(1000);
+    int yPos = yPosAboveScreen * -1;
 
     Meteor m = new Meteor(xPos, yPos);
     m.setInitialSpeed(gamestate, floor);
@@ -256,7 +269,7 @@ void blowUpMissilesOnScreen() {
   if (framesSinceLast >= FRAMES_BETWEEN_EXPLOSIONS) {
      // blow next boi up
 
-     if (toBlowUpIndex <= indexToBlowUpTo) {
+     if (toBlowUpIndex <= indexToBlowUpTo && missiles.size() != 0) {
        missiles.get(toBlowUpIndex).explode();
        missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
 
@@ -270,4 +283,31 @@ void blowUpMissilesOnScreen() {
    }
 
    framesSinceLast++;
+}
+
+boolean waveFinished() {
+  
+  // check all are destroyed
+  for (int i = 0; i < meteors.size(); i++) {
+    Meteor current = meteors.get(i);
+    if (!current.isDestroyed) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void resetVariables() {
+  missiles = new ArrayList<>();
+  meteors = new ArrayList<>();
+  indexToBlowUpTo = 0;
+  toBlowUpIndex = 0;
+}
+
+void nextWave() {
+  resetVariables();
+  // increment wave
+  gamestate.incWave();
+  initialiseWave();
 }

@@ -18,4 +18,6 @@ final class GameState {
   public float getGravity() { return gravityForce; }
   public float getDrag() { return dragForce; }
 
+  // incrementers
+  public void incWave() { wave++; }
 }

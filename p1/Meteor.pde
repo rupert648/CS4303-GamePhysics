@@ -3,7 +3,7 @@ final class Meteor {
     // CONSTANTS
     float METEOR_RADIUS = 10;
     float METEOR_TRAIL_LENGTH = 50;
-    int TRAIL_LENGTH = 50;
+    int TRAIL_LENGTH = 100;
     final float EXPLOSION_RADIUS = 60;  // max size of the explosion
     final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
     
@@ -51,9 +51,9 @@ final class Meteor {
 
             // calculate max x and y
             if (left) {
-                maxTheta = atan(position.x/height);
+                maxTheta = atan(position.x/(height-position.y));
             } else {
-                maxTheta = atan((width-position.x)/height);
+                maxTheta = atan((width-position.x)/(height-position.y));
             }
 
             // check new theta is less than this max
@@ -79,9 +79,9 @@ final class Meteor {
         velocity = new PVector(randXDir, randYDir);    
 
         // set speed
-        float speed = 0.1 + gs.getWave()*0.5;
-        // speed +- 20%
-        float multiplier = 0.8 + rand.nextFloat() * 0.4;
+        float speed = 0.1 + gs.getWave()*0.01;
+        // speed +- 50%
+        float multiplier = 0.5 + rand.nextFloat();
         speed = speed * multiplier;
 
         velocity.mult(speed);    
