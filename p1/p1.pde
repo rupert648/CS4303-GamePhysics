@@ -90,7 +90,7 @@ void draw() {
   // standard wave rendering
   clickLength = System.currentTimeMillis();
   
-  hud.draw(gamestate.getWave(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
+  hud.draw(gamestate.getWave(), gamestate.getScore(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
   floor.draw();
   drawBallistae();
   drawLine();
@@ -269,17 +269,19 @@ void blowUpMissilesOnScreen() {
   if (framesSinceLast >= FRAMES_BETWEEN_EXPLOSIONS) {
      // blow next boi up
 
-     if (toBlowUpIndex <= indexToBlowUpTo && missiles.size() != 0) {
-       missiles.get(toBlowUpIndex).explode();
-       missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
+      if (toBlowUpIndex <= indexToBlowUpTo && missiles.size() != 0) {
+        missiles.get(toBlowUpIndex).explode();
+        int numbBlownUp = missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
+        // update score
+        gamestate.updateScore(numbBlownUp);
 
-       framesSinceLast = 0;
-       toBlowUpIndex++;
-     } else if (toBlowUpIndex == indexToBlowUpTo) {
-       // have blown up all missiles so far
-       framesSinceLast = 0;
-       blowingUpMissiles = false;
-     }
+        framesSinceLast = 0;
+        toBlowUpIndex++;
+      } else if (toBlowUpIndex == indexToBlowUpTo) {
+        // have blown up all missiles so far
+        framesSinceLast = 0;
+        blowingUpMissiles = false;
+      }
    }
 
    framesSinceLast++;

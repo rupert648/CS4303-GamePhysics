@@ -1,5 +1,9 @@
 final class GameState {
+  // CONSTANTS
+  private int SCORE_INC = 25;
+
   private int wave;
+  private int score;
   private int difficulty;
   
   // keep in gamestate so we can in future adjust throughout game
@@ -8,6 +12,7 @@ final class GameState {
   
   public GameState(int wave, float gravityForce, float dragForce) {
     this.wave = wave;
+    this.score = 0;
     this.gravityForce = gravityForce;
     this.dragForce = dragForce;
   }
@@ -17,7 +22,13 @@ final class GameState {
   public int getDifficulty() { return difficulty; }
   public float getGravity() { return gravityForce; }
   public float getDrag() { return dragForce; }
+  public int getScore() { return score; }
 
   // incrementers
   public void incWave() { wave++; }
+  public void updateScore(int numbBlownUp) {
+    int scoreInc = numbBlownUp * SCORE_INC;
+
+    score += scoreInc;
+  }
 }

@@ -185,13 +185,15 @@ final class Missile {
     setExplosionLocation();
   }
 
-  void checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
-
+  int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
+    int numbBlownUp = 0;
     for (int i = 0; i < meteors.size(); i++) {
       if (meteors.get(i).inImpactArea(position, EXPLOSION_RADIUS)) {
         meteors.get(i).destroy();
+        numbBlownUp++;
       }
     }
 
+    return numbBlownUp;
   }
 }

@@ -6,11 +6,15 @@ final class Hud {
     position = new PVector(x, y) ;
   }
   
-  public void draw(int score, long strength, boolean mouseDown, boolean outOfAmmo) {
+  public void draw(int wave, int score, long strength, boolean mouseDown, boolean outOfAmmo) {
+    // text look
     textSize(36);
-    String stringScore = "SCORE: " + Integer.toString(score);
     fill(204, 102, 0);
-    text(stringScore, position.x, position.y);
+
+    String waveString = "Wave: " + Integer.toString(wave);
+    text(waveString, position.x, position.y);
+    String scoreString = "Score: " + Integer.toString(score);
+    text(scoreString, position.x, position.y + 40);
     
     drawPowerBar(strength, mouseDown, outOfAmmo);
   }
