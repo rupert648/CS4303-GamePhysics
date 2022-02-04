@@ -37,6 +37,7 @@ Ballista selectedBallista;
 // Missiles
 ArrayList<Missile> missiles = new ArrayList<>();
 int toBlowUpIndex = 0;
+int indexToBlowUpTo = 0;
 
 // Meteors
 ArrayList<Meteor> meteors = new ArrayList<>();
@@ -46,6 +47,12 @@ long startClick = 0;
 long clickLength = 0;
 long endClick = 0;
 boolean mouseDown = false;
+
+// blowing stuff up
+boolean blowingUpMissiles = false;
+int FRAMES_BETWEEN_EXPLOSIONS = 10;
+int framesSinceLast = 0;
+
 
 // Initialise display and game elements
 // NB Accessing displayWidth/Height pre setup() doesn't seem to work out
@@ -80,6 +87,10 @@ void draw() {
  drawLine();
  drawMissiles();
  drawMeteors();
+
+ if (blowingUpMissiles) {
+   blowUpMissilesOnScreen();
+ }
 }
 
 void mousePressed() {
@@ -125,13 +136,9 @@ void keyPressed() {
       selectedBallista = ballistae[2];
       break;
     case EXPLODE_KEY:
-      if (toBlowUpIndex < missiles.size()) {
-        missiles.get(toBlowUpIndex).explode();
-
-        missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
-        
-        toBlowUpIndex++;
-      }
+      blowingUpMissiles = true;
+      // blow up all current missiles
+      indexToBlowUpTo = missiles.size() - 1;
       break;
   }
 }
@@ -243,4 +250,24 @@ void initialiseWave() {
 
     meteors.add(m);
   }
+}
+
+void blowUpMissilesOnScreen() {
+  if (framesSinceLast >= FRAMES_BETWEEN_EXPLOSIONS) {
+     // blow next boi up
+
+     if (toBlowUpIndex <= indexToBlowUpTo) {
+       missiles.get(toBlowUpIndex).explode();
+       missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
+
+       framesSinceLast = 0;
+       toBlowUpIndex++;
+     } else if (toBlowUpIndex == indexToBlowUpTo) {
+       // have blown up all missiles so far
+       framesSinceLast = 0;
+       blowingUpMissiles = false;
+     }
+   }
+
+   framesSinceLast++;
 }
