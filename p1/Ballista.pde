@@ -36,4 +36,8 @@ final class Ballista {
   public boolean isOutOfAmmo() {
     return ammo <= 0;
   }
+
+  public void setAmmo(int amount) {
+    ammo = amount;
+  }
 }

@@ -5,8 +5,8 @@ final int FLOOR_HEIGHT = 75;
 final float FRICTION_CONSTANT = 0.5;
 
 // BALLISTA CONSTANTS
-final int numberOfBallistae = 3;
-final int ammoPerBallistae = 10;
+final int NUMB_BALLISTA = 3;
+final int BALLISTA_MAX_AMMO = 10;
 
 // MISSILE CONSTANTS
 final int MISSILE_SIZE_X = 10;
@@ -33,7 +33,7 @@ final char EXPLODE_KEY = ' ';
 GameState gamestate;
 Hud hud;
 Floor floor;
-Ballista[] ballistae = new Ballista[numberOfBallistae];
+Ballista[] ballistae = new Ballista[NUMB_BALLISTA];
 Ballista selectedBallista;
 
 // Missiles
@@ -198,7 +198,7 @@ float calcLaunchForce(long diff) {
 }
 
 void initialiseBallistae() {
-  for (int i = 0; i < numberOfBallistae; i++) {
+  for (int i = 0; i < NUMB_BALLISTA; i++) {
     int xPos;
 
     switch(i) {
@@ -210,7 +210,7 @@ void initialiseBallistae() {
      
     int yPos = height - 100;
     
-    ballistae[i] = new Ballista(xPos, yPos, ammoPerBallistae);
+    ballistae[i] = new Ballista(xPos, yPos, BALLISTA_MAX_AMMO);
   }
 }
 
@@ -226,7 +226,7 @@ void initialiseCities() {
 }
 
 void drawBallistae() {
-  for (int i = 0; i < numberOfBallistae; i++) {
+  for (int i = 0; i < NUMB_BALLISTA; i++) {
     ballistae[i].draw();
   }
 }
@@ -270,7 +270,7 @@ Ballista getselectedBallista() {
   Ballista closest = ballistae[0];
   float closestDist = ballistae[0].cursorDistance();
   
-  for (int i = 1; i < numberOfBallistae; i++) {
+  for (int i = 1; i < NUMB_BALLISTA; i++) {
     float newDist = ballistae[i].cursorDistance();
     if (newDist < closestDist) {
       closest = ballistae[i];
@@ -343,6 +343,11 @@ void resetVariables() {
   meteors = new ArrayList<>();
   indexToBlowUpTo = 0;
   toBlowUpIndex = 0;
+
+  // reset ammo
+  for (int i = 0; i < NUMB_BALLISTA; i++) {
+    ballistae[i].setAmmo(BALLISTA_MAX_AMMO);
+  }
 }
 
 void nextWave() {
