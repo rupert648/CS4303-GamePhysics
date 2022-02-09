@@ -87,13 +87,17 @@ final class Meteor {
         velocity.mult(speed);    
     }
 
-    public void updateSpeed(float gravityForce, float dragForce, Floor floor) {
-        if (isDestroyed) return;
-
+    public void checkFloorCollision(Floor floor, City[] cities) {
         if (collidingWithFloor(floor)) {
+            checkCities(cities);
+
             destroy();
             return;
         }
+    }
+
+    public void updateSpeed(float gravityForce, float dragForce) {
+        if (isDestroyed) return;
 
         // apply less gravity to meteors -> better for gameplay
         velocity.y += gravityForce*0.01;
@@ -182,4 +186,13 @@ final class Meteor {
     void setExplosionLocation() {
         explosionPosition = position.copy();
     }
+
+    void checkCities(City[] cities) {
+        for (int i = 0; i < cities.length; i++) {
+            if (cities[i].inImpactArea(position, EXPLOSION_RADIUS)) {
+                cities[i].destroy();
+            }
+        }
+    }
+
 }

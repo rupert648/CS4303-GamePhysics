@@ -23,6 +23,9 @@ final float MIN_LAUNCH_FORCE = 50.0;
 final float MAX_LAUNCH_FORCE = 100.0;
 final float LAUNCH_FORCE_MULTIPLER = 0.1;
 
+// CITY CONSTANTS
+final int START_NUMB_CITIES = 6;
+
 // CONTROL CONSTANTS
 final char EXPLODE_KEY = ' ';
 
@@ -40,6 +43,9 @@ int indexToBlowUpTo = 0;
 
 // Meteors
 ArrayList<Meteor> meteors = new ArrayList<>();
+
+// cities
+City[] cities = new City[START_NUMB_CITIES];
 
 // Timing
 long startClick = 0;
@@ -70,6 +76,8 @@ void setup() {
   initialiseBallistae();
   // set initial selected ballista
   selectedBallista = ballistae[1];
+  // initialise cities
+  initialiseCities();
 
   initialiseWave();  
 }
@@ -79,13 +87,23 @@ void draw() {
   // reset background to remove previous frame drawings
   background(0);
 
+  if (allCitiesDestroyed()) {
+
+    // TODO: add YOU LOST screen
+    System.exit(0);
+  }
+
   if (waveFinished()) {
     // new wave
+
+    // TODO: add intermediate timeout to show text
     textSize(128);
     text("WAVE "+gamestate.getWave()+" FINISHED", width/2, height/2);
     nextWave();
     return;
   }
+
+
   
   // standard wave rendering
   clickLength = System.currentTimeMillis();
@@ -93,6 +111,7 @@ void draw() {
   hud.draw(gamestate.getWave(), gamestate.getScore(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
   floor.draw();
   drawBallistae();
+  drawCities();
   drawLine();
   drawMissiles();
   drawMeteors();
@@ -195,9 +214,26 @@ void initialiseBallistae() {
   }
 }
 
+void initialiseCities() {
+  int yPos = height - 75;
+
+  for (int i = 0; i < START_NUMB_CITIES; i++) {
+    int xPos = (width * (i+1)) / START_NUMB_CITIES;
+    xPos -= 100;
+    cities[i] = new City(xPos, yPos);
+  }
+
+}
+
 void drawBallistae() {
   for (int i = 0; i < numberOfBallistae; i++) {
     ballistae[i].draw();
+  }
+}
+
+void drawCities() {
+  for (int i = 0; i < START_NUMB_CITIES; i++) {
+    cities[i].draw();
   }
 }
 
@@ -220,7 +256,9 @@ void drawMissiles() {
 
 void drawMeteors() {
   for (int i = 0; i < meteors.size(); i++) {
-    meteors.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag(), floor);
+    meteors.get(i).checkFloorCollision(floor, cities);
+
+    meteors.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag());
 
     meteors.get(i).move();
     
@@ -312,4 +350,12 @@ void nextWave() {
   // increment wave
   gamestate.incWave();
   initialiseWave();
+}
+
+boolean allCitiesDestroyed() {
+  for (int i = 0; i < START_NUMB_CITIES; i++) {
+    if (!cities[i].destroyed) return false;
+  }
+
+  return true;
 }

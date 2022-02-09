@@ -1,4 +1,7 @@
 final class Ballista {
+  // constants
+  final int BALLISTA_SIZE = 50;
+
   PVector position;
   int ammo;
   
@@ -11,7 +14,7 @@ final class Ballista {
     // rectangle for now
     fill(255) ;
     stroke(0);
-    rect(position.x, position.y, 50, 50);
+    rect(position.x, position.y, BALLISTA_SIZE, BALLISTA_SIZE);
     fill(0);
     text(Integer.toString(ammo), position.x+8, position.y+35);
   }
