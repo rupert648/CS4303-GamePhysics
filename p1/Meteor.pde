@@ -106,10 +106,10 @@ final class Meteor {
         // magnitude of force is also dependent on the current speed
 
         // TODO: mess with drag coefficients to make it fun for meteors
-        // PVector drag = velocity.copy().mult(-1 * dragForce);
+        PVector drag = velocity.copy().mult(-1 * dragForce * 0.01);
 
-        // velocity.y += drag.y;
-        // velocity.x += drag.x;
+        velocity.y += drag.y;
+        velocity.x += drag.x;
     }
 
     public void move() {

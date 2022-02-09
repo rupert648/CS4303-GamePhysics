@@ -87,18 +87,22 @@ void draw() {
   // reset background to remove previous frame drawings
   background(0);
 
-  if (allCitiesDestroyed()) {
-
-    // TODO: add YOU LOST screen
-    System.exit(0);
-  }
+  // if (allCitiesDestroyed()) {
+  //   // TODO: add YOU LOST screen
+  //   System.exit(0);
+  // }
 
   if (waveFinished()) {
-    // new wave
+    // update score to respect remainining cities
+    updateScoreForSurvivingCities();
 
+    // TODO: add new city if score is > 10000
+    
     // TODO: add intermediate timeout to show text
     textSize(128);
     text("WAVE "+gamestate.getWave()+" FINISHED", width/2, height/2);
+
+    // new wave
     nextWave();
     return;
   }
@@ -363,4 +367,13 @@ boolean allCitiesDestroyed() {
   }
 
   return true;
+}
+
+void updateScoreForSurvivingCities() {
+  int surviving = 0;
+  for (int i = 0; i < START_NUMB_CITIES; i++) {
+    if (!cities[i].destroyed) surviving++;
+  }
+
+  gamestate.updateScoreCities(surviving);
 }

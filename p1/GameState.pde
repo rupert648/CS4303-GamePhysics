@@ -1,6 +1,7 @@
 final class GameState {
   // CONSTANTS
   private int SCORE_INC = 25;
+  private int CITIES_INC = 100;
 
   private int wave;
   private int score;
@@ -16,6 +17,23 @@ final class GameState {
     this.gravityForce = gravityForce;
     this.dragForce = dragForce;
   }
+
+  int getWaveMultiplier() {
+    int waveVal = wave + 1;
+    switch (waveVal) {
+      case 1: return 1;
+      case 2: return 1;
+      case 3: return 2;
+      case 4: return 2;
+      case 5: return 3;
+      case 6: return 3;
+      case 7: return 4;
+      case 8: return 4;
+      case 9: return 5;
+      case 10: return 5;
+      default: return 6;
+    }
+  }
   
   // getters
   public int getWave() { return wave; }
@@ -27,7 +45,13 @@ final class GameState {
   // incrementers
   public void incWave() { wave++; }
   public void updateScore(int numbBlownUp) {
-    int scoreInc = numbBlownUp * SCORE_INC;
+    int scoreInc = numbBlownUp * SCORE_INC * getWaveMultiplier();
+
+    score += scoreInc;
+  }
+
+  public void updateScoreCities(int surviving) {
+    int scoreInc = surving * CITIES_INC * getWaveMultiplier();
 
     score += scoreInc;
   }
