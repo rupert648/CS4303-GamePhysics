@@ -1,11 +1,14 @@
 final class Meteor {
 
     // CONSTANTS
-    float METEOR_RADIUS = 10;
+    float METEOR_RADIUS = 20;
     float METEOR_TRAIL_LENGTH = 50;
     int TRAIL_LENGTH = 100;
     final float EXPLOSION_RADIUS = 60;  // max size of the explosion
     final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
+
+    // images
+    PImage image;
     
     PVector position;
     PVector velocity;
@@ -24,6 +27,8 @@ final class Meteor {
         for (int i = 0; i < TRAIL_LENGTH; i++) {
             trail[i] = new PVector(x,y);
         }
+        // load in image
+        image = loadImage("../images/meteor.png");
     }
 
     public void setInitialSpeed(GameState gs, Floor floor) {
@@ -129,25 +134,28 @@ final class Meteor {
         trail[0] = position.copy();
     }
 
-    public void draw() {
+    public void draw(ArrayList<Meteor> meteors, int thisIndex) {
         if (isDestroyed) {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
+                // blow up any other meteors this explosion impacts
+                checkMeteorsAndDestroyImpacted(meteors, thisIndex);
             }
 
             return;
         }
 
-        fill(255, 0, 0);
-        circle(position.x, position.y, METEOR_RADIUS);
-
         drawTrail();
+        image(image, position.x, position.y, METEOR_RADIUS, METEOR_RADIUS);
+
+        
     }
 
     public void drawTrail() {
         for (int i = 0 ; i < TRAIL_LENGTH; i++) {
-            fill(255, 255, 0);
-            circle(trail[i].x, trail[i].y, METEOR_RADIUS / 5);
+            circle(trail[i].x, trail[i].y, METEOR_RADIUS / 10);
+            circle(trail[i].x+3, trail[i].y, METEOR_RADIUS / 20);
+            circle(trail[i].x-3, trail[i].y, METEOR_RADIUS / 20);
         }
     }
 
@@ -193,6 +201,21 @@ final class Meteor {
                 cities[i].destroy();
             }
         }
+    }
+
+    int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors, int thisIndex) {
+        int numbBlownUp = 0;
+        for (int i = 0; i < meteors.size(); i++) {
+            // skip yourself
+            if (i == thisIndex) continue;
+
+            if (meteors.get(i).inImpactArea(position, explosionCurrentRadius)) {
+                meteors.get(i).destroy();
+                numbBlownUp++;
+            }
+        }
+
+        return numbBlownUp;
     }
 
 }

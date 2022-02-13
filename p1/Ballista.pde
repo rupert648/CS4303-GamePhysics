@@ -2,19 +2,40 @@ final class Ballista {
   // constants
   final int BALLISTA_SIZE = 50;
 
+  // images
+  PImage base;
+  PImage main;
+
   PVector position;
   int ammo;
   
   public Ballista(int x, int y, int ammo) {
     position = new PVector(x, y);
     this.ammo = ammo;
+
+    // load images (for animations etc)
+    base = loadImage("../images/BallistaBase.png");
+    main = loadImage("../images/BallistaMain.png");
   }
   
   public void draw() {
     // rectangle for now
     fill(255) ;
     stroke(0);
-    rect(position.x, position.y, BALLISTA_SIZE, BALLISTA_SIZE);
+    image(base, position.x, position.y, BALLISTA_SIZE, BALLISTA_SIZE);
+
+
+    // calc angle between position and mouse
+    float ang = atan2(position.x-mouseX, position.y-mouseY);
+
+    // rotate image to face mouse
+    pushMatrix();
+    imageMode(CENTER);
+    translate(position.x, position.y);
+    rotate(-ang-HALF_PI);
+    image(main, 0, 0, BALLISTA_SIZE, BALLISTA_SIZE);
+    popMatrix();
+
     fill(0);
     text(Integer.toString(ammo), position.x+8, position.y+35);
   }

@@ -51,7 +51,7 @@ final class GameState {
   }
 
   public void updateScoreCities(int surviving) {
-    int scoreInc = surving * CITIES_INC * getWaveMultiplier();
+    int scoreInc = surviving * CITIES_INC * getWaveMultiplier();
 
     score += scoreInc;
   }

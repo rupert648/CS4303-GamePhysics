@@ -2,8 +2,8 @@ final class Missile {
   
   // constants
   final float LAUNCH_TIME = 1.6;  // the time for which the missile is being launched from the slingshot
-  final float EXPLOSION_RADIUS = 60;  // max size of the explosion
-  final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
+  final float EXPLOSION_RADIUS = 100;  // max size of the explosion
+  final float EXPLOSION_EXPANSION_RATE = 4; // rate at which explosion expands
   
   // The missile is represented by another handsome rectangle
   // the position field indicates the top-left of that rectangle.  
@@ -13,7 +13,7 @@ final class Missile {
   
   // movement
   PVector direction;
-  PVector speed;
+  PVector velocity;
 
   // explosion
   PVector explosionPosition;
@@ -32,7 +32,7 @@ final class Missile {
     float distX = mouseX - closestBallistaX ;
     float distY = mouseY - closestBallistaY ;
     
-    // direction is used to calc initial speed (but it is just the speed normalised)
+    // direction is used to calc initial velocity (but it is just the velocity normalised)
     direction = new PVector(distX, distY);  
     direction.normalize();
   }
@@ -45,8 +45,8 @@ final class Missile {
     // v = a * t
     float speedIncrease = a * LAUNCH_TIME;
     
-    speed = direction.copy();
-    speed = speed.mult(speedIncrease);
+    velocity = direction.copy();
+    velocity = velocity.mult(speedIncrease);
   }
 
   public void setExplosionLocation() {
@@ -56,11 +56,15 @@ final class Missile {
   // getters
   int getX() {return (int)position.x ;}
   int getY() {return (int)position.y ;}
-  // The missile is displayed as a rectangle
-  void draw() {
+
+  
+  void draw(ArrayList<Meteor> meteors, GameState gamestate) {
     if (exploded) {
       if (!explosionAnimationCompleted) {
         drawExplosion();
+        int numbBlownUp = checkMeteorsAndDestroyImpacted(meteors);
+
+        gamestate.updateScore(numbBlownUp);
       }
 
       return;
@@ -89,9 +93,9 @@ final class Missile {
     // check collision with floor
     if (collidingWithFloor(floor)) {
       bounceFloor();
-      // if we have bounced a lot, don't update the speed anymore
+      // if we have bounced a lot, don't update the velocity anymore
       // prevents gravity affecting ball once on the ground
-      if (speed.y == 0) {
+      if (velocity.y == 0) {
         computeFriction(floor);      
         return;
       };
@@ -100,31 +104,26 @@ final class Missile {
     if (collidingWithWall()) bounceWall();
    
     // update due to gravity
-    speed.y += gravityForce;
+    velocity.y += gravityForce;
     
     // force acts parallel (and opposite) to the direction of travel
-    // magnitude of force is also dependent on the current speed
-    PVector drag = speed.copy().mult(-1 * dragForce);
+    // magnitude of force is also dependent on the current velocity
+    PVector drag = velocity.copy().mult(-1 * dragForce);
     
-    speed.y += drag.y;
-    speed.x += drag.x;
-    
-    
-    // update direction for future use
-    direction = speed.copy();
-    direction.normalize();
+
+    velocity.add(drag);
   }
   
   void setSpeed(float x, float y) {
-    speed.y = y;
-    speed.x = x;
+    velocity.y = y;
+    velocity.x = x;
   }
   
   // handle movement. Returns true if not out of play area
   // What about collision detection with enemies?
   boolean move() {
-    position.y += ( speed.y );
-    position.x += ( speed.x );
+    position.y += ( velocity.y );
+    position.x += ( velocity.x );
     
     return true;
   }  
@@ -140,42 +139,42 @@ final class Missile {
   }
   
   void bounceFloor() {
-    // if speed.y < certain amount then stop bouncing
-    if (speed.y < 0.05) {
-      speed.y = 0;
+    // if velocity.y < certain amount then stop bouncing
+    if (velocity.y < 0.05) {
+      velocity.y = 0;
       return;
     }
     // trying to reverse y
-    speed.y = speed.y * -1;
+    velocity.y = velocity.y * -1;
   }
   
   void bounceWall() {
-    // if very low speed to stop odd behaviour just set to 0
-    if (speed.x < 0.05 && speed.x > 0) { speed.x = 0; return; }
-    else if (speed.x > -0.05 && speed.x < 0) { speed.x = 0; return; }
+    // if very low velocity to stop odd behaviour just set to 0
+    if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
+    else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
     
-    // reverse speed
-    speed.x = speed.x * -1;
+    // reverse velocity
+    velocity.x = velocity.x * -1;
   }
   
   void computeFriction(Floor floor) {
-    if (speed.x == 0) return;
-    // if speed very low stop ball
-    else if (speed.x < 0.05 && speed.x > 0) { speed.x = 0; return; }
-    else if (speed.x > -0.05 && speed.x < 0) { speed.x = 0; return; }
+    if (velocity.x == 0) return;
+    // if velocity very low stop ball
+    else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
+    else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
     // friction force constant no matter mass
     // proportional to frictional constant of floor
     
-    // acceleration is in opposite direction to x speed
+    // acceleration is in opposite direction to x velocity
     float a = floor.getMu();
     // change in velocity = a * some time difference
     float accelTime = 0.1;
     float vDiff = accelTime * a;
     
-    if (speed.x < 0) {
-      speed.x += vDiff;
+    if (velocity.x < 0) {
+      velocity.x += vDiff;
     } else {
-      speed.x -= vDiff;
+      velocity.x -= vDiff;
     }
        
   }
@@ -188,7 +187,7 @@ final class Missile {
   int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
     int numbBlownUp = 0;
     for (int i = 0; i < meteors.size(); i++) {
-      if (meteors.get(i).inImpactArea(position, EXPLOSION_RADIUS)) {
+      if (meteors.get(i).inImpactArea(position, explosionCurrentRadius)) {
         meteors.get(i).destroy();
         numbBlownUp++;
       }

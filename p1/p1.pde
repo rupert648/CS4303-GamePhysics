@@ -30,6 +30,7 @@ final int START_NUMB_CITIES = 6;
 final char EXPLODE_KEY = ' ';
 
 // Game Items
+PImage background;
 GameState gamestate;
 Hud hud;
 Floor floor;
@@ -63,6 +64,8 @@ int framesSinceLast = 0;
 // NB Accessing displayWidth/Height pre setup() doesn't seem to work out
 void setup() {
   size(1000,1000);
+  // load background img
+  background = loadImage("../images/Background.png");
   
   // initialise the GameState.
   gamestate = new GameState(0, GRAVITY_CONSTANT, DRAG_CONSTANT);
@@ -85,7 +88,7 @@ void setup() {
 // update and render
 void draw() {
   // reset background to remove previous frame drawings
-  background(0);
+  background(background);
 
   // if (allCitiesDestroyed()) {
   //   // TODO: add YOU LOST screen
@@ -254,7 +257,7 @@ void drawMissiles() {
       missiles.get(i).move();
     }
     
-    missiles.get(i).draw();
+    missiles.get(i).draw(meteors, gamestate);
   }
 }
 
@@ -266,7 +269,7 @@ void drawMeteors() {
 
     meteors.get(i).move();
     
-    meteors.get(i).draw();
+    meteors.get(i).draw(meteors, i);
   }
 }
 
@@ -313,9 +316,6 @@ void blowUpMissilesOnScreen() {
 
       if (toBlowUpIndex <= indexToBlowUpTo && missiles.size() != 0) {
         missiles.get(toBlowUpIndex).explode();
-        int numbBlownUp = missiles.get(toBlowUpIndex).checkMeteorsAndDestroyImpacted(meteors);
-        // update score
-        gamestate.updateScore(numbBlownUp);
 
         framesSinceLast = 0;
         toBlowUpIndex++;
