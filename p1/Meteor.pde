@@ -4,7 +4,7 @@ final class Meteor {
     float METEOR_RADIUS = 20;
     float METEOR_TRAIL_LENGTH = 50;
     int TRAIL_LENGTH = 100;
-    final float EXPLOSION_RADIUS = 60;  // max size of the explosion
+    final float EXPLOSION_RADIUS = 100;  // max size of the explosion
     final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
 
     // images

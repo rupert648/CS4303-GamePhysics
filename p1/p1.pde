@@ -100,6 +100,7 @@ void draw() {
     updateScoreForSurvivingCities();
 
     // TODO: add new city if score is > 10000
+    gamestate.checkIfCanAddNewCity(cities);
     
     // TODO: add intermediate timeout to show text
     textSize(128);

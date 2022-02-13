@@ -55,4 +55,22 @@ final class GameState {
 
     score += scoreInc;
   }
+
+  public void checkIfCanAddNewCity(City[] cities) {
+    ArrayList<Integer> destroyed = new ArrayList<>();
+
+    if (score > 10000) {
+      // can add new city
+      for (int i = 0; i < cities.length; i++) {
+        if (cities[i].destroyed) {
+          destroyed.add(i);
+        }
+      }
+
+      // get random index
+      int r = (int) random(destroyed.size());
+      City cityToReestablish = cities[destroyed.get(r)];
+      cityToReestablish.destroyed = false;
+    }
+  }
 }
