@@ -16,7 +16,7 @@ final class Hud {
     textSize(24);
     fill(204, 102, 0);
 
-    String waveString = "Wave: " + Integer.toString(wave);
+    String waveString = "Wave: " + Integer.toString(wave+1);
     text(waveString, position.x, position.y);
     String scoreString = "Score: " + Integer.toString(score);
     text(scoreString, position.x, position.y + 40);

@@ -44,7 +44,7 @@ int toBlowUpIndex = 0;
 int indexToBlowUpTo = 0;
 
 // Meteors
-ArrayList<Meteor> meteors = new ArrayList<>();
+ArrayList<Meteor> meteors = new ArrayList<>();  // array list allows easy splitting
 
 // cities
 City[] cities = new City[START_NUMB_CITIES];
@@ -60,6 +60,9 @@ boolean blowingUpMissiles = false;
 int FRAMES_BETWEEN_EXPLOSIONS = 10;
 int framesSinceLast = 0;
 
+// images
+PImage meteorImg;
+
 
 // Initialise display and game elements
 // NB Accessing displayWidth/Height pre setup() doesn't seem to work out
@@ -73,6 +76,8 @@ void setup() {
   // initialise the Hud;
   hud = new Hud(width - 150, 50);
   textOverlay = new TextOverlay();
+
+  loadImages();
 
   // initialise floor
   floor = new Floor(FLOOR_HEIGHT, FRICTION_CONSTANT);
@@ -121,7 +126,7 @@ void draw() {
   // perform check every 30 frames
   if (frameCount % 10 == 0 && waveFinished()) {
     textOverlay.setStartTime();
-    textOverlay.setText("Wave " + (gamestate.getWave()+1));
+    textOverlay.setText("Wave " + Integer.toString(gamestate.getWave()+2));
     // update score to respect remainining cities
     updateScoreForSurvivingCities();
 
@@ -323,8 +328,24 @@ void initialiseWave() {
     int yPosAboveScreen = rand.nextInt(1000);
     int yPos = yPosAboveScreen * -1;
 
-    Meteor m = new Meteor(xPos, yPos);
+    Meteor m = new Meteor(xPos, yPos, meteorImg);
     m.setInitialSpeed(gamestate, floor);
+
+    // only after 2nd wave
+    if (gamestate.getWave() > 1) {
+      // randomise whether meteor will split
+      // 1 in 5 chance
+      boolean willSplit = ((int) random(0, 5)) == 1;
+      m.setWillSplit(willSplit);
+
+      // random height of split
+      float val = 500;
+      if (willSplit) {
+        val = random(0, height-500);
+        m.setSplitHeight(val);
+        System.out.println(val);
+      }
+    }
 
     meteors.add(m);
   }
@@ -398,4 +419,8 @@ void updateScoreForSurvivingCities() {
   }
 
   gamestate.updateScoreCities(surviving);
+}
+
+void loadImages() {
+  meteorImg = loadImage("../images/meteor.png");
 }

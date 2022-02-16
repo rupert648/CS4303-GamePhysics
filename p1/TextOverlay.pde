@@ -31,7 +31,16 @@ final class TextOverlay {
   public void draw() {
     if (!displaying) return;
 
+    rectMode(CENTER);
+    fill(0);
+    rect(width/2, height/2, 300, 50);
+
+    fill(255, 215, 0);
+    textAlign(CENTER, CENTER);
     textSize(40);
     text(text, width/2, height/2);
+    textAlign(LEFT);
+
+    rectMode(CORNER);
   }
 }

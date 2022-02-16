@@ -67,10 +67,12 @@ final class GameState {
         }
       }
 
-      // get random index
-      int r = (int) random(destroyed.size());
-      City cityToReestablish = cities[destroyed.get(r)];
-      cityToReestablish.destroyed = false;
+      if (destroyed.size() > 0) {
+        // get random index
+        int r = (int) random(destroyed.size());
+        City cityToReestablish = cities[destroyed.get(r)];
+        cityToReestablish.destroyed = false;
+      }
     }
   }
 }

@@ -6,6 +6,8 @@ final class Meteor {
     int TRAIL_LENGTH = 100;
     final float EXPLOSION_RADIUS = 100;  // max size of the explosion
     final float EXPLOSION_EXPANSION_RATE = 2; // rate at which explosion expands
+    final float GRAVITY_STRENGTH = 0.005;
+    final float DRAG_STRENGTH = 0.001;
 
     // images
     PImage image;
@@ -15,20 +17,27 @@ final class Meteor {
 
     PVector[] trail = new PVector[TRAIL_LENGTH];
 
+    boolean addedLoopyness = false;
+
     // explosion
     PVector explosionPosition;
     boolean isDestroyed = false;
     boolean explosionAnimationCompleted = false;
     float explosionCurrentRadius = 0;
 
-    public Meteor(int x, int y) {
+    // splitting
+    boolean willSplit = false;
+    float splitHeight = 0;
+    boolean hasSplit = false;
+
+    public Meteor(int x, int y, PImage image) {
         position = new PVector(x, y);
         // set trail
         for (int i = 0; i < TRAIL_LENGTH; i++) {
             trail[i] = new PVector(x,y);
         }
         // load in image
-        image = loadImage("../images/meteor.png");
+        this.image = image;
     }
 
     public void setInitialSpeed(GameState gs, Floor floor) {
@@ -71,15 +80,15 @@ final class Meteor {
         randXDir = left ? randXDir * -1.0: randXDir;
         // add horizontal speed to account for gravity
         // this makes them more "loopy"
-        if (left) {
-            if (position.x > height / 2) {
-                randXDir -= 3;
-            }
-        } else {
-            if (position.x < height / 2) {
-                randXDir += 3;
-            }
-        }
+        // if (left) {
+        //     if (position.x > height / 2) {
+        //         randXDir -= 3;
+        //     }
+        // } else {
+        //     if (position.x < height / 2) {
+        //         randXDir += 3;
+        //     }
+        // }
 
         velocity = new PVector(randXDir, randYDir);    
 
@@ -90,6 +99,10 @@ final class Meteor {
         speed = speed * multiplier;
 
         velocity.mult(speed);    
+    }
+
+    public void specifyInitialSpeed(PVector initial) {
+        velocity = initial;
     }
 
     public void checkFloorCollision(Floor floor, City[] cities, Ballista[] ballistae) {
@@ -106,13 +119,13 @@ final class Meteor {
         if (isDestroyed) return;
 
         // apply less gravity to meteors -> better for gameplay
-        velocity.y += gravityForce*0.01;
+        velocity.y += gravityForce*GRAVITY_STRENGTH;
 
         // force acts parallel (and opposite) to the direction of travel
         // magnitude of force is also dependent on the current speed
 
         // TODO: mess with drag coefficients to make it fun for meteors
-        PVector drag = velocity.copy().mult(-1 * dragForce * 0.01);
+        PVector drag = velocity.copy().mult(-1 * dragForce * DRAG_STRENGTH);
 
         velocity.y += drag.y;
         velocity.x += drag.x;
@@ -146,10 +159,23 @@ final class Meteor {
             return;
         }
 
+        if (!addedLoopyness && position.y > -10) {
+            // add some x speed to make "more loopy"
+            // position check prevents meteors going off screen
+            if (velocity.x > 0 && position.x < width-200) {
+                velocity.x += 0.3;
+            } else if (velocity.x < 0 && position.x > 200) {
+                velocity.x -= 0.3;
+            }
+            addedLoopyness = true;
+        }
+
+        if (willSplit && !hasSplit && checkSplitHeight()) {
+            split(meteors);
+        }
+
         drawTrail();
         image(image, position.x, position.y, METEOR_RADIUS, METEOR_RADIUS);
-
-        
     }
 
     public void drawTrail() {
@@ -228,6 +254,35 @@ final class Meteor {
         }
 
         return numbBlownUp;
+    }
+
+
+    // code for splitting
+    void setWillSplit(boolean willSplit) {
+        this.willSplit = willSplit;
+    }
+
+    void setSplitHeight(float splitHeight) {
+        this.splitHeight = splitHeight;
+    }
+
+    boolean checkSplitHeight() {
+        return position.y > splitHeight;
+    }
+
+    void split(ArrayList<Meteor> meteors) {
+        System.out.println("splitting");
+        // create new meteor just with opposite x value for now
+        Meteor newMeteor = new Meteor((int) position.x, (int) position.y, this.image);
+        float xVel = velocity.x > 0 ? velocity.x * -1  - 10: velocity.x * -1 + 10;
+        PVector initialVelocity = new PVector(velocity.x * -1, velocity.y);
+        newMeteor.specifyInitialSpeed(initialVelocity);
+
+        // add to array
+        meteors.add(newMeteor);
+
+        // set hasSplit to true
+        hasSplit = true;
     }
 
 }
