@@ -304,7 +304,7 @@ void drawLine() {
 void drawMissiles() {
   for (int i = 0; i < missiles.size(); i++) {
     // move missile if not exploded
-    if (!missiles.get(i).exploded) {
+    if (!missiles.get(i).isExploded()) {
       missiles.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag(), floor);
       missiles.get(i).move();
     }
@@ -420,7 +420,7 @@ boolean waveFinished() {
   // check all are destroyed
   for (int i = 0; i < meteors.size(); i++) {
     Meteor current = meteors.get(i);
-    if (!current.isDestroyed) {
+    if (!current.isExploded()) {
       return false;
     }
   }

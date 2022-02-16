@@ -1,4 +1,4 @@
-final class City {
+final class City implements Collidable {
   // constants
   final int CITY_SIZE = 50;
 

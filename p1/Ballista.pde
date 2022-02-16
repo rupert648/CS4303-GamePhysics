@@ -1,4 +1,4 @@
-final class Ballista {
+final class Ballista implements Collidable {
   // constants
   final int BALLISTA_SIZE = 30;
 

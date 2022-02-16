@@ -1,4 +1,4 @@
-final class Meteor {
+final class Meteor extends Explodable implements Collidable {
 
     // CONSTANTS
     float METEOR_RADIUS = 20;
@@ -12,18 +12,11 @@ final class Meteor {
     // images
     PImage image;
     
-    PVector position;
     PVector velocity;
 
     PVector[] trail = new PVector[TRAIL_LENGTH];
 
     boolean addedLoopyness = false;
-
-    // explosion
-    PVector explosionPosition;
-    boolean isDestroyed = false;
-    boolean explosionAnimationCompleted = false;
-    float explosionCurrentRadius = 0;
 
     // splitting
     boolean willSplit = false;
@@ -78,17 +71,7 @@ final class Meteor {
 
         // set direction - 
         randXDir = left ? randXDir * -1.0: randXDir;
-        // add horizontal speed to account for gravity
-        // this makes them more "loopy"
-        // if (left) {
-        //     if (position.x > height / 2) {
-        //         randXDir -= 3;
-        //     }
-        // } else {
-        //     if (position.x < height / 2) {
-        //         randXDir += 3;
-        //     }
-        // }
+
 
         velocity = new PVector(randXDir, randYDir);    
 
@@ -110,13 +93,13 @@ final class Meteor {
             checkCities(cities);
             checkBallistae(ballistae);
 
-            destroy();
+            explode();
             return;
         }
     }
 
     public void updateSpeed(float gravityForce, float dragForce) {
-        if (isDestroyed) return;
+        if (exploded) return;
 
         // apply less gravity to meteors -> better for gameplay
         velocity.y += gravityForce*GRAVITY_STRENGTH;
@@ -132,7 +115,7 @@ final class Meteor {
     }
 
     public void move() {
-        if (isDestroyed) return;
+        if (exploded) return;
 
         updateTrail();
 
@@ -149,7 +132,7 @@ final class Meteor {
     }
 
     public void draw(ArrayList<Meteor> meteors, int thisIndex) {
-        if (isDestroyed) {
+        if (exploded) {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
                 // blow up any other meteors this explosion impacts
@@ -189,16 +172,6 @@ final class Meteor {
         }
     }
 
-    void drawExplosion() {
-        if (explosionCurrentRadius >= EXPLOSION_RADIUS) {
-            explosionAnimationCompleted = true;
-            return;
-        }
-
-        explosionCurrentRadius += EXPLOSION_EXPANSION_RATE;
-        fill(0, 255, 0);
-        circle(explosionPosition.x, explosionPosition.y, explosionCurrentRadius);
-    }
 
     public float getHeight(Floor floor) {
         return floor.getHeight() - position.y;
@@ -210,19 +183,10 @@ final class Meteor {
         return position.y >= floorCollisionPosition;
     }
 
-    boolean inImpactArea(PVector missilePos, float explosionRadius) {
+    boolean inImpactArea(PVector missilePos, float radius) {
         // if in circle around missilePos of explosion Radius then destroy it
         float distance = missilePos.dist(position);
-        return distance < explosionRadius;
-    }
-
-    void destroy() {
-        isDestroyed = true;
-        setExplosionLocation();
-    }
-
-    void setExplosionLocation() {
-        explosionPosition = position.copy();
+        return distance < radius;
     }
 
     void checkCities(City[] cities) {
@@ -256,10 +220,10 @@ final class Meteor {
                 current.position.y > 0;
 
             if (onScreen &&
-                !meteors.get(i).isDestroyed &&
+                !meteors.get(i).isExploded() &&
                 meteors.get(i).inImpactArea(position, explosionCurrentRadius)
             ) {
-                meteors.get(i).destroy();
+                meteors.get(i).explode();
                 numbBlownUp++;
             }
         }

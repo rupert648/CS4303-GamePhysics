@@ -1,25 +1,16 @@
-final class Missile {
+final class Missile extends Explodable {
   
   // constants
   final float LAUNCH_TIME = 1.6;  // the time for which the missile is being launched from the slingshot
-  final float EXPLOSION_RADIUS = 100;  // max size of the explosion
-  final float EXPLOSION_EXPANSION_RATE = 4; // rate at which explosion expands
   
   // The missile is represented by another handsome rectangle
   // the position field indicates the top-left of that rectangle.  
-  PVector position ;
   int missileWidth, missileHeight ;
   float mass ;
   
   // movement
   PVector direction;
   PVector velocity;
-
-  // explosion
-  PVector explosionPosition;
-  boolean exploded = false;
-  boolean explosionAnimationCompleted = false;
-  float explosionCurrentRadius = 0;
 
   // image
   PImage image;
@@ -52,15 +43,6 @@ final class Missile {
     velocity = direction.copy();
     velocity = velocity.mult(speedIncrease);
   }
-
-  public void setExplosionLocation() {
-    explosionPosition = position.copy();
-  }
-  
-  // getters
-  int getX() {return (int)position.x ;}
-  int getY() {return (int)position.y ;}
-
   
   void draw(ArrayList<Meteor> meteors, Satellite[] satellites, GameState gamestate) {
     if (exploded) {
@@ -89,18 +71,6 @@ final class Missile {
     popMatrix();
   }
 
-  void drawExplosion() {
-    // check if reached max size
-    if (explosionCurrentRadius >= EXPLOSION_RADIUS) {
-      explosionAnimationCompleted = true;
-      return;
-    }
-
-    explosionCurrentRadius += EXPLOSION_EXPANSION_RATE;
-    fill(255, 255, 0);
-    circle(explosionPosition.x, explosionPosition.y, explosionCurrentRadius);
-
-  }
   
   void updateSpeed(float gravityForce, float dragForce, Floor floor) {
     
@@ -193,11 +163,6 @@ final class Missile {
        
   }
 
-  void explode() {
-    exploded = true;
-    setExplosionLocation();
-  }
-
   int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
         // TODO: only check those on screen for collision
         int numbBlownUp = 0;
@@ -210,10 +175,10 @@ final class Missile {
                 current.position.y > 0;
 
             if (onScreen &&
-                !meteors.get(i).isDestroyed &&
+                !meteors.get(i).isExploded() &&
                 meteors.get(i).inImpactArea(position, explosionCurrentRadius)
             ) {
-                meteors.get(i).destroy();
+                meteors.get(i).explode();
                 numbBlownUp++;
             }
         }
@@ -224,7 +189,7 @@ final class Missile {
   void checkSatellitesAndDestroyImpacted(Satellite[] satellites) {
     for (int i = 0; i < satellites.length; i++) {
       if (satellites[i] != null && satellites[i].inImpactArea(position, explosionCurrentRadius)) {
-        satellites[i].destroy();
+        satellites[i].explode();
       }
     }
   }
