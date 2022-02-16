@@ -21,11 +21,15 @@ final class Missile {
   boolean explosionAnimationCompleted = false;
   float explosionCurrentRadius = 0;
 
-  public Missile(int x, int y, int missileWidth, int missileHeight, float mass) {
+  // image
+  PImage image;
+
+  public Missile(int x, int y, int missileWidth, int missileHeight, float mass, PImage image) {
     position = new PVector(x, y) ;
     this.missileWidth = missileWidth ;
     this.missileHeight = missileHeight ;
     this.mass = mass;
+    this.image = image;
   }
   
   public void setDirection(float closestBallistaX, float closestBallistaY) {
@@ -70,9 +74,16 @@ final class Missile {
       return;
     };
 
+    float ang = atan2(velocity.x, velocity.y);
 
-    fill(200) ;
-    rect(position.x, position.y, missileWidth, missileHeight) ;
+    // rotate to face direction of travel
+    pushMatrix();
+    imageMode(CENTER);
+    translate(position.x, position.y);
+    rotate(-ang-PI);
+    translate(-position.x, -position.y);
+    image(image, position.x, position.y, missileWidth, missileHeight);
+    popMatrix();
   }
 
   void drawExplosion() {

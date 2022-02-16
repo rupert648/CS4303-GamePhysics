@@ -10,14 +10,14 @@ final class Ballista {
   int ammo;
   boolean disabled;
   
-  public Ballista(int x, int y, int ammo) {
+  public Ballista(int x, int y, int ammo, PImage base, PImage main) {
     position = new PVector(x, y);
     this.ammo = ammo;
     disabled = false;
 
-    // load images (for animations etc)
-    base = loadImage("../images/BallistaBase.png");
-    main = loadImage("../images/BallistaMain.png");
+
+    this.base = base;
+    this.main = main;
   }
   
   public void draw() {

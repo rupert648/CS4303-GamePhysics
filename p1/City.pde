@@ -6,10 +6,10 @@ final class City {
   boolean destroyed = false;
   PImage city;
 
-  public City(int x, int y) {
+  public City(int x, int y, PImage city) {
     position = new PVector(x,y);
 
-    city = loadImage("../images/city.png");
+    this.city = city;
   }
 
   public void draw() {

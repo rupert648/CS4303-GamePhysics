@@ -9,8 +9,8 @@ final int NUMB_BALLISTA = 3;
 final int BALLISTA_MAX_AMMO = 10;
 
 // MISSILE CONSTANTS
-final int MISSILE_SIZE_X = 10;
-final int MISSILE_SIZE_Y = 10;
+final int MISSILE_SIZE_X = 15;
+final int MISSILE_SIZE_Y = 30;
 final float MISSILE_MASS = 5;
 
 // METEOR CONSTANTS
@@ -62,6 +62,10 @@ int framesSinceLast = 0;
 
 // images
 PImage meteorImg;
+PImage ballistaBase;
+PImage ballistaMain;
+PImage cityImg;
+PImage rocketImg;
 
 
 // Initialise display and game elements
@@ -223,7 +227,8 @@ void shoot(float launchForce) {
     (int) selectedBallista.position.x,
     (int) selectedBallista.position.y,
     MISSILE_SIZE_X, MISSILE_SIZE_Y, 
-    MISSILE_MASS
+    MISSILE_MASS,
+    rocketImg
   );
     
   // set dir and speed
@@ -256,7 +261,7 @@ void initialiseBallistae() {
      
     int yPos = height - 100;
     
-    ballistae[i] = new Ballista(xPos, yPos, BALLISTA_MAX_AMMO);
+    ballistae[i] = new Ballista(xPos, yPos, BALLISTA_MAX_AMMO, ballistaBase, ballistaMain);
   }
 }
 
@@ -264,9 +269,8 @@ void initialiseCities() {
   int yPos = height - 75;
 
   for (int i = 0; i < START_NUMB_CITIES; i++) {
-    int xPos = (width * (i+1)) / START_NUMB_CITIES;
-    xPos -= 100;
-    cities[i] = new City(xPos, yPos);
+    int xPos = ((width - 200) * (i+1)) / START_NUMB_CITIES;
+    cities[i] = new City(xPos, yPos, cityImg);
   }
 
 }
@@ -423,4 +427,9 @@ void updateScoreForSurvivingCities() {
 
 void loadImages() {
   meteorImg = loadImage("../images/meteor.png");
+  // load images (for animations etc)
+  ballistaBase = loadImage("../images/BallistaBase.png");
+  ballistaMain = loadImage("../images/BallistaMain.png");
+  cityImg = loadImage("../images/city.png");
+  rocketImg = loadImage("../images/Rocket.png");
 }

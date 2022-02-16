@@ -33,7 +33,7 @@ final class TextOverlay {
 
     rectMode(CENTER);
     fill(0);
-    rect(width/2, height/2, 300, 50);
+    rect(width/2, height/2, 300, 80);
 
     fill(255, 215, 0);
     textAlign(CENTER, CENTER);
