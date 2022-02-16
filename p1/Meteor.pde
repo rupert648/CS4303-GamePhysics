@@ -1,4 +1,4 @@
-final class Meteor extends Explodable implements Collidable {
+class Meteor extends Explodable implements Collidable {
 
     // CONSTANTS
     float METEOR_RADIUS = 20;

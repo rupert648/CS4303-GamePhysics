@@ -52,6 +52,9 @@ final class Missile extends Explodable {
 
         gamestate.updateScore(numbBlownUp);
 
+        // TODO: add check for smart meteors
+        checkSmartMeteors(smartMeteors);
+
         // TODO: add score for these
         checkSatellitesAndDestroyImpacted(satellites);
       }
@@ -139,28 +142,28 @@ final class Missile extends Explodable {
     velocity.x = velocity.x * -1;
   }
   
-  void computeFriction(Floor floor) {
-    if (velocity.x == 0) return;
-    // if velocity very low stop ball
-    // prevents weird mechanics
-    else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
-    else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
-    // friction force constant no matter mass
-    // proportional to frictional constant of floor
-    
-    // acceleration is in opposite direction to x velocity
-    float a = floor.getMu();
-    // change in velocity = a * some time difference
-    float accelTime = 0.1;
-    float vDiff = accelTime * a;
-    
-    if (velocity.x < 0) {
-      velocity.x += vDiff;
-    } else {
-      velocity.x -= vDiff;
+    void computeFriction(Floor floor) {
+        if (velocity.x == 0) return;
+        // if velocity very low stop ball
+        // prevents weird mechanics
+        else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
+        else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
+        // friction force constant no matter mass
+        // proportional to frictional constant of floor
+        
+        // acceleration is in opposite direction to x velocity
+        float a = floor.getMu();
+        // change in velocity = a * some time difference
+        float accelTime = 0.1;
+        float vDiff = accelTime * a;
+        
+        if (velocity.x < 0) {
+        velocity.x += vDiff;
+        } else {
+        velocity.x -= vDiff;
+        }
+        
     }
-       
-  }
 
     int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
         // TODO: only check those on screen for collision
@@ -174,10 +177,10 @@ final class Missile extends Explodable {
                 current.position.y > 0;
 
             if (onScreen &&
-                !meteors.get(i).isExploded() &&
-                meteors.get(i).inImpactArea(position, explosionCurrentRadius)
+                !current.isExploded() &&
+                current.inImpactArea(position, explosionCurrentRadius)
             ) {
-                meteors.get(i).explode();
+                current.explode();
                 numbBlownUp++;
             }
         }
@@ -185,10 +188,27 @@ final class Missile extends Explodable {
         return numbBlownUp;
     }
 
-    int checkSmartMeteorsAndDestroyImpacted(ArrayList<SmartMeteor> sMeteors) {
+    void checkSmartMeteors(ArrayList<SmartMeteor> sMeteors) {
         int numbBlownUp = 0;
         for (int i = 0; i < sMeteors.size(); i++) {
-            SmartMeteor current = meteors.get(i);
+            SmartMeteor current = sMeteors.get(i);
+
+            boolean onScreen = current.position.x > 0 &&
+                current.position.x < width &&
+                current.position.y > 0;
+
+            if (onScreen &&
+                !current.isExploded() &&
+                // have to hit within the inner half of the explosion
+                current.inImpactArea(position, EXPLOSION_RADIUS)) {
+                    current.explode();
+                    break;
+                }
+
+            if (current.willCollideExplosion(EXPLOSION_RADIUS, explosionPosition)) {
+                current.changeCourseToAvoid(EXPLOSION_RADIUS, explosionPosition);
+            }
+
         }
     }
 

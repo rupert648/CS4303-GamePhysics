@@ -48,6 +48,7 @@ int indexToBlowUpTo = 0;
 
 // Meteors
 ArrayList<Meteor> meteors = new ArrayList<>();  // array list allows easy splitting
+ArrayList<SmartMeteor> smartMeteors = new ArrayList<>();
 
 // cities
 City[] cities = new City[START_NUMB_CITIES];
@@ -72,6 +73,7 @@ PImage ballistaBase;
 PImage ballistaMain;
 PImage cityImg;
 PImage rocketImg;
+PImage smartMeteorImg;
 
 
 // Initialise display and game elements
@@ -161,6 +163,7 @@ void draw() {
   drawLine();
   drawMissiles();
   drawMeteors();
+  drawSmartMeteors();
   drawSatellites();
   drawBallistae();
 
@@ -325,6 +328,18 @@ void drawMeteors() {
   }
 }
 
+void drawSmartMeteors() {
+  for (int i = 0; i < smartMeteors.size(); i++) {
+    smartMeteors.get(i).checkFloorCollision(floor, cities, ballistae);
+    
+    smartMeteors.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag());
+
+    smartMeteors.get(i).move();
+    
+    smartMeteors.get(i).draw(meteors, i);
+  }
+}
+
 void drawSatellites() {
   for (int i = 0; i < MAX_SATELLITES_PER_WAVE; i++) {
     if (satellites[i] != null) {
@@ -340,6 +355,7 @@ void drawSatellites() {
 void initialiseWave() {
 
   initialiseMeteors();
+  initialiseSmartMeteors();
   initialiseSatellites();
 
 }
@@ -378,6 +394,26 @@ void initialiseMeteors() {
     }
 
     meteors.add(m);
+  }
+}
+
+void initialiseSmartMeteors() {
+  int numbMeteorInWave = 1;
+  for (int i = 0; i < numbMeteorInWave; i++) {
+    Random rand = new Random();
+
+    int xPos = rand.nextInt(width);
+    
+    // give random start pos above the screen
+    // therefore gives "impression" of coming in spread out
+    // rather than all at once
+    int yPosAboveScreen = rand.nextInt(1000);
+    int yPos = yPosAboveScreen * -1;
+
+    SmartMeteor m = new SmartMeteor(xPos, yPos, smartMeteorImg, gamestate.getGravity(), gamestate.getDrag());
+    m.setInitialSpeed(gamestate, floor);
+
+    smartMeteors.add(m);
   }
 }
 
@@ -472,4 +508,5 @@ void loadImages() {
   ballistaMain = loadImage("../images/BallistaMain.png");
   cityImg = loadImage("../images/city.png");
   rocketImg = loadImage("../images/Rocket.png");
+  smartMeteorImg = loadImage("../images/smartMeteor.png");
 }
