@@ -1,6 +1,6 @@
 final class Ballista {
   // constants
-  final int BALLISTA_SIZE = 50;
+  final int BALLISTA_SIZE = 30;
 
   // images
   PImage base;
@@ -8,10 +8,12 @@ final class Ballista {
 
   PVector position;
   int ammo;
+  boolean disabled;
   
   public Ballista(int x, int y, int ammo) {
     position = new PVector(x, y);
     this.ammo = ammo;
+    disabled = false;
 
     // load images (for animations etc)
     base = loadImage("../images/BallistaBase.png");
@@ -36,15 +38,10 @@ final class Ballista {
     image(main, 0, 0, BALLISTA_SIZE, BALLISTA_SIZE);
     popMatrix();
 
-    fill(0);
-    text(Integer.toString(ammo), position.x+8, position.y+35);
-  }
-  
-  public float cursorDistance() {
-    float xDist = mouseX-position.x;
-    float yDist = mouseY-position.y;
-    
-    return sqrt(xDist * xDist + yDist * yDist);
+    // draw ammo
+    textSize(25);
+    fill(255, 0, 0);
+    text(Integer.toString(ammo), position.x, position.y+35);
   }
   
   public boolean decrementAmmo() {
@@ -60,5 +57,24 @@ final class Ballista {
 
   public void setAmmo(int amount) {
     ammo = amount;
+  }
+
+  boolean inImpactArea(PVector meteorPos, float explosionRadius) {
+    // if in circle around missilePos of explosion Radius then destroy it
+
+    float distance = meteorPos.dist(position);
+    return distance < explosionRadius;
+  }
+
+  void disable() {
+    disabled = true;
+  }
+
+  void undisable() {
+    disabled = false;
+  }
+
+  boolean isDisabled() {
+    return disabled;
   }
 }

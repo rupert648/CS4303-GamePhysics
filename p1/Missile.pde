@@ -160,6 +160,7 @@ final class Missile {
   void computeFriction(Floor floor) {
     if (velocity.x == 0) return;
     // if velocity very low stop ball
+    // prevents weird mechanics
     else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
     else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
     // friction force constant no matter mass

@@ -33,6 +33,7 @@ final char EXPLODE_KEY = ' ';
 PImage background;
 GameState gamestate;
 Hud hud;
+TextOverlay textOverlay;
 Floor floor;
 Ballista[] ballistae = new Ballista[NUMB_BALLISTA];
 Ballista selectedBallista;
@@ -71,6 +72,8 @@ void setup() {
   gamestate = new GameState(0, GRAVITY_CONSTANT, DRAG_CONSTANT);
   // initialise the Hud;
   hud = new Hud(width - 150, 50);
+  textOverlay = new TextOverlay();
+
   // initialise floor
   floor = new Floor(FLOOR_HEIGHT, FRICTION_CONSTANT);
   // initialise cursor crosshair
@@ -90,39 +93,60 @@ void draw() {
   // reset background to remove previous frame drawings
   background(background);
 
-  // if (allCitiesDestroyed()) {
-  //   // TODO: add YOU LOST screen
-  //   System.exit(0);
-  // }
+  if (textOverlay.displaying) {
+    if (!textOverlay.checkDisplay()) {
+      // finish running if game finished
+      if (allCitiesDestroyed()) System.exit(0);
+      // once stopped displaying, launch the new wave
+      nextWave();
+    } else {
+      textOverlay.draw();
+      floor.draw();
+      drawCities();
+      drawMeteors();
+      drawBallistae();  
+    }
 
-  if (waveFinished()) {
-    // update score to respect remainining cities
-    updateScoreForSurvivingCities();
-
-    // TODO: add new city if score is > 10000
-    gamestate.checkIfCanAddNewCity(cities);
-    
-    // TODO: add intermediate timeout to show text
-    textSize(128);
-    text("WAVE "+gamestate.getWave()+" FINISHED", width/2, height/2);
-
-    // new wave
-    nextWave();
     return;
   }
 
+  // perform check every 30 frames
+  if (frameCount % 30 == 0 && allCitiesDestroyed()) {
+    textOverlay.setStartTime();
+    textOverlay.setText("You Lost");
 
+    return;
+  }
+
+  // perform check every 30 frames
+  if (frameCount % 10 == 0 && waveFinished()) {
+    textOverlay.setStartTime();
+    textOverlay.setText("Wave " + (gamestate.getWave()+1));
+    // update score to respect remainining cities
+    updateScoreForSurvivingCities();
+
+    gamestate.checkIfCanAddNewCity(cities);
+
+    return;
+  }
   
   // standard wave rendering
   clickLength = System.currentTimeMillis();
   
-  hud.draw(gamestate.getWave(), gamestate.getScore(), clickLength - startClick, mouseDown, selectedBallista.isOutOfAmmo());
+  hud.draw(
+    gamestate.getWave(),
+    gamestate.getScore(),
+    clickLength - startClick,
+    mouseDown,
+    selectedBallista.isOutOfAmmo()
+  );
   floor.draw();
-  drawBallistae();
   drawCities();
   drawLine();
   drawMissiles();
   drawMeteors();
+  drawBallistae();
+
 
   if (blowingUpMissiles) {
     blowUpMissilesOnScreen();
@@ -130,12 +154,18 @@ void draw() {
 }
 
 void mousePressed() {
+  // no clicking intermission
+  if (textOverlay.displaying) return;
+
   // set startClickTime
   mouseDown = true;
   startClick = System.currentTimeMillis();
 }
 
 void mouseReleased() {
+  // no clicking intermission
+  if (textOverlay.displaying) return;
+
   endClick = System.currentTimeMillis();
   
   long diff = endClick-startClick;
@@ -143,8 +173,8 @@ void mouseReleased() {
   // use to calc strength of shot
   float launchForce = calcLaunchForce(diff);
   
-  // check ammo
-  if (!selectedBallista.decrementAmmo()) {
+  // check ammo or disabled
+  if (selectedBallista.isDisabled() || !selectedBallista.decrementAmmo()) {
     // reset variables
     startClick = 0;
     clickLength = 0;
@@ -161,6 +191,9 @@ void mouseReleased() {
 }
 
 void keyPressed() {
+  // no clicking whilst text on screen
+  if (textOverlay.displaying) return;
+
   switch(key) {
     case '1':
       selectedBallista = ballistae[0];
@@ -264,7 +297,7 @@ void drawMissiles() {
 
 void drawMeteors() {
   for (int i = 0; i < meteors.size(); i++) {
-    meteors.get(i).checkFloorCollision(floor, cities);
+    meteors.get(i).checkFloorCollision(floor, cities, ballistae);
 
     meteors.get(i).updateSpeed(gamestate.getGravity(), gamestate.getDrag());
 
@@ -272,21 +305,6 @@ void drawMeteors() {
     
     meteors.get(i).draw(meteors, i);
   }
-}
-
-Ballista getselectedBallista() {
-  Ballista closest = ballistae[0];
-  float closestDist = ballistae[0].cursorDistance();
-  
-  for (int i = 1; i < NUMB_BALLISTA; i++) {
-    float newDist = ballistae[i].cursorDistance();
-    if (newDist < closestDist) {
-      closest = ballistae[i];
-      closestDist = newDist;
-    }
-  }
-  
-  return closest;
 }
 
 void initialiseWave() {
@@ -352,6 +370,8 @@ void resetVariables() {
   // reset ammo
   for (int i = 0; i < NUMB_BALLISTA; i++) {
     ballistae[i].setAmmo(BALLISTA_MAX_AMMO);
+    // enable ballistae
+    ballistae[i].undisable();
   }
 }
 

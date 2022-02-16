@@ -92,9 +92,10 @@ final class Meteor {
         velocity.mult(speed);    
     }
 
-    public void checkFloorCollision(Floor floor, City[] cities) {
+    public void checkFloorCollision(Floor floor, City[] cities, Ballista[] ballistae) {
         if (collidingWithFloor(floor)) {
             checkCities(cities);
+            checkBallistae(ballistae);
 
             destroy();
             return;
@@ -199,6 +200,14 @@ final class Meteor {
         for (int i = 0; i < cities.length; i++) {
             if (cities[i].inImpactArea(position, EXPLOSION_RADIUS)) {
                 cities[i].destroy();
+            }
+        }
+    }
+
+    void checkBallistae(Ballista[] ballistae) {
+        for (int i = 0; i < ballistae.length; i++) {
+            if (ballistae[i].inImpactArea(position, EXPLOSION_RADIUS)) {
+                ballistae[i].disable();
             }
         }
     }

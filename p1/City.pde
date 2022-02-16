@@ -24,9 +24,9 @@ final class City {
   }
 
   boolean inImpactArea(PVector meteorPos, float explosionRadius) {
-        // if in circle around missilePos of explosion Radius then destroy it
+    // if in circle around missilePos of explosion Radius then destroy it
 
-        float distance = meteorPos.dist(position);
-        return distance < explosionRadius;
-    }
+    float distance = meteorPos.dist(position);
+    return distance < explosionRadius;
+  }
 }
