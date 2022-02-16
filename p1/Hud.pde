@@ -7,8 +7,13 @@ final class Hud {
   }
   
   public void draw(int wave, int score, long strength, boolean mouseDown, boolean outOfAmmo) {
+    
+    fill(0);
+    noStroke();
+    rect(position.x-10, position.y - 30, 400, 85);
+
     // text look
-    textSize(36);
+    textSize(24);
     fill(204, 102, 0);
 
     String waveString = "Wave: " + Integer.toString(wave);

@@ -279,7 +279,8 @@ void drawCities() {
 }
 
 void drawLine() {
-  stroke(255, 0, 0);
+  if (selectedBallista.disabled) stroke(255, 0, 0);
+  else stroke(0, 255, 0);
   line(mouseX, mouseY, selectedBallista.position.x, selectedBallista.position.y);
 }
 

@@ -154,8 +154,11 @@ final class Meteor {
 
     public void drawTrail() {
         for (int i = 0 ; i < TRAIL_LENGTH; i++) {
+            stroke(255, 0, 0 );
             circle(trail[i].x, trail[i].y, METEOR_RADIUS / 10);
+            stroke(255, 215, 0 );
             circle(trail[i].x+3, trail[i].y, METEOR_RADIUS / 20);
+            stroke(255, 215, 0 );
             circle(trail[i].x-3, trail[i].y, METEOR_RADIUS / 20);
         }
     }
