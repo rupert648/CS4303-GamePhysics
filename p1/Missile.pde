@@ -94,7 +94,6 @@ final class Missile extends Explodable {
     // magnitude of force is also dependent on the current velocity
     PVector drag = velocity.copy().mult(-1 * dragForce);
     
-
     velocity.add(drag);
   }
   
@@ -163,7 +162,7 @@ final class Missile extends Explodable {
        
   }
 
-  int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
+    int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
         // TODO: only check those on screen for collision
         int numbBlownUp = 0;
         for (int i = 0; i < meteors.size(); i++) {
@@ -186,11 +185,18 @@ final class Missile extends Explodable {
         return numbBlownUp;
     }
 
-  void checkSatellitesAndDestroyImpacted(Satellite[] satellites) {
-    for (int i = 0; i < satellites.length; i++) {
-      if (satellites[i] != null && satellites[i].inImpactArea(position, explosionCurrentRadius)) {
-        satellites[i].explode();
-      }
+    int checkSmartMeteorsAndDestroyImpacted(ArrayList<SmartMeteor> sMeteors) {
+        int numbBlownUp = 0;
+        for (int i = 0; i < sMeteors.size(); i++) {
+            SmartMeteor current = meteors.get(i);
+        }
     }
-  }
+
+    void checkSatellitesAndDestroyImpacted(Satellite[] satellites) {
+        for (int i = 0; i < satellites.length; i++) {
+            if (satellites[i] != null && satellites[i].inImpactArea(position, explosionCurrentRadius)) {
+            satellites[i].explode();
+            }
+        }
+    }
 }

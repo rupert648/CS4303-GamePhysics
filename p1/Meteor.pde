@@ -231,7 +231,6 @@ final class Meteor extends Explodable implements Collidable {
         return numbBlownUp;
     }
 
-
     // code for splitting
     void setWillSplit(boolean willSplit) {
         this.willSplit = willSplit;
