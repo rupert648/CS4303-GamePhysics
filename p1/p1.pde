@@ -16,6 +16,9 @@ final float MISSILE_MASS = 5;
 // METEOR CONSTANTS
 final int START_NUMBER_METEOR = 10;
 
+// SATELLITE CONSTANTS
+final int MAX_SATELLITES_PER_WAVE = 3;
+
 // FORCE CONSTANTS
 final float GRAVITY_CONSTANT = 0.2;
 final float DRAG_CONSTANT = 0.01;
@@ -48,6 +51,9 @@ ArrayList<Meteor> meteors = new ArrayList<>();  // array list allows easy splitt
 
 // cities
 City[] cities = new City[START_NUMB_CITIES];
+
+// satellites
+Satellite[] satellites = new Satellite[MAX_SATELLITES_PER_WAVE];
 
 // Timing
 long startClick = 0;
@@ -113,7 +119,8 @@ void draw() {
       floor.draw();
       drawCities();
       drawMeteors();
-      drawBallistae();  
+      drawBallistae();
+      drawSatellites();
     }
 
     return;
@@ -154,6 +161,7 @@ void draw() {
   drawLine();
   drawMissiles();
   drawMeteors();
+  drawSatellites();
   drawBallistae();
 
 
@@ -301,7 +309,7 @@ void drawMissiles() {
       missiles.get(i).move();
     }
     
-    missiles.get(i).draw(meteors, gamestate);
+    missiles.get(i).draw(meteors, satellites, gamestate);
   }
 }
 
@@ -317,10 +325,28 @@ void drawMeteors() {
   }
 }
 
+void drawSatellites() {
+  for (int i = 0; i < MAX_SATELLITES_PER_WAVE; i++) {
+    if (satellites[i] != null) {
+      satellites[i].move();
+      satellites[i].draw(meteors, gamestate);
+      if (satellites[i].attemptToFire()) {
+        satellites[i].fire(meteors, meteorImg);
+      }
+    }
+  }
+}
+
 void initialiseWave() {
 
-  int numbMeteorInWave = START_NUMBER_METEOR + (gamestate.getWave() * 5);
+  initialiseMeteors();
+  initialiseSatellites();
 
+}
+
+void initialiseMeteors() {
+
+  int numbMeteorInWave = START_NUMBER_METEOR + (gamestate.getWave() * 5);
   for (int i = 0; i < numbMeteorInWave; i++) {
     Random rand = new Random();
 
@@ -352,6 +378,21 @@ void initialiseWave() {
     }
 
     meteors.add(m);
+  }
+}
+
+void initialiseSatellites() {
+  // TODO: change to be random numb
+  int numbSatellitesInWave = 1;
+  for (int i = 0; i < numbSatellitesInWave; i++) {
+    int xOffScreen = (int) random(0, 400);
+    int startXPos = xOffScreen * -1;
+    // start in top half of screen
+    int startYPos = (int) random(0, height/2);
+
+    Satellite s = new Satellite(startXPos, startYPos);
+
+    satellites[i] = s;
   }
 }
 
@@ -427,7 +468,6 @@ void updateScoreForSurvivingCities() {
 
 void loadImages() {
   meteorImg = loadImage("../images/meteor.png");
-  // load images (for animations etc)
   ballistaBase = loadImage("../images/BallistaBase.png");
   ballistaMain = loadImage("../images/BallistaMain.png");
   cityImg = loadImage("../images/city.png");

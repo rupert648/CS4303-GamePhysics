@@ -62,13 +62,16 @@ final class Missile {
   int getY() {return (int)position.y ;}
 
   
-  void draw(ArrayList<Meteor> meteors, GameState gamestate) {
+  void draw(ArrayList<Meteor> meteors, Satellite[] satellites, GameState gamestate) {
     if (exploded) {
       if (!explosionAnimationCompleted) {
         drawExplosion();
         int numbBlownUp = checkMeteorsAndDestroyImpacted(meteors);
 
         gamestate.updateScore(numbBlownUp);
+
+        // TODO: add score for these
+        checkSatellitesAndDestroyImpacted(satellites);
       }
 
       return;
@@ -133,8 +136,7 @@ final class Missile {
   // handle movement. Returns true if not out of play area
   // What about collision detection with enemies?
   boolean move() {
-    position.y += ( velocity.y );
-    position.x += ( velocity.x );
+    position.add(velocity);
     
     return true;
   }  
@@ -197,14 +199,33 @@ final class Missile {
   }
 
   int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
-    int numbBlownUp = 0;
-    for (int i = 0; i < meteors.size(); i++) {
-      if (meteors.get(i).inImpactArea(position, explosionCurrentRadius)) {
-        meteors.get(i).destroy();
-        numbBlownUp++;
-      }
+        // TODO: only check those on screen for collision
+        int numbBlownUp = 0;
+        for (int i = 0; i < meteors.size(); i++) {
+            Meteor current = meteors.get(i);
+            // comparisons cheaper than calculating distance
+            // better to check OS than to calc distance
+            boolean onScreen = current.position.x > 0 &&
+                current.position.x < width &&
+                current.position.y > 0;
+
+            if (onScreen &&
+                !meteors.get(i).isDestroyed &&
+                meteors.get(i).inImpactArea(position, explosionCurrentRadius)
+            ) {
+                meteors.get(i).destroy();
+                numbBlownUp++;
+            }
+        }
+
+        return numbBlownUp;
     }
 
-    return numbBlownUp;
+  void checkSatellitesAndDestroyImpacted(Satellite[] satellites) {
+    for (int i = 0; i < satellites.length; i++) {
+      if (satellites[i] != null && satellites[i].inImpactArea(position, explosionCurrentRadius)) {
+        satellites[i].destroy();
+      }
+    }
   }
 }

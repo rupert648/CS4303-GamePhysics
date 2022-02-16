@@ -242,12 +242,23 @@ final class Meteor {
     }
 
     int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors, int thisIndex) {
+        // TODO: only check those on screen for collision
         int numbBlownUp = 0;
         for (int i = 0; i < meteors.size(); i++) {
-            // skip yourself
+            // skip self
             if (i == thisIndex) continue;
 
-            if (meteors.get(i).inImpactArea(position, explosionCurrentRadius)) {
+            Meteor current = meteors.get(i);
+            // comparisons cheaper than calculating distance
+            // better to check OS than to calc distance
+            boolean onScreen = current.position.x > 0 &&
+                current.position.x < width &&
+                current.position.y > 0;
+
+            if (onScreen &&
+                !meteors.get(i).isDestroyed &&
+                meteors.get(i).inImpactArea(position, explosionCurrentRadius)
+            ) {
                 meteors.get(i).destroy();
                 numbBlownUp++;
             }
@@ -271,7 +282,6 @@ final class Meteor {
     }
 
     void split(ArrayList<Meteor> meteors) {
-        System.out.println("splitting");
         // create new meteor just with opposite x value for now
         Meteor newMeteor = new Meteor((int) position.x, (int) position.y, this.image);
         float xVel = velocity.x > 0 ? velocity.x * -1  - 10: velocity.x * -1 + 10;
