@@ -18,6 +18,7 @@ final int START_NUMBER_METEOR = 10;
 
 // SATELLITE CONSTANTS
 final int MAX_SATELLITES_PER_WAVE = 3;
+final int MAX_SATELLITE_OFF_SCREEN = 400;
 
 // FORCE CONSTANTS
 final float GRAVITY_CONSTANT = 0.2;
@@ -54,7 +55,7 @@ ArrayList<SmartMeteor> smartMeteors = new ArrayList<>();
 City[] cities = new City[START_NUMB_CITIES];
 
 // satellites
-Satellite[] satellites = new Satellite[MAX_SATELLITES_PER_WAVE];
+ArrayList<Satellite> satellites = new ArrayList<>();
 
 // Timing
 long startClick = 0;
@@ -312,7 +313,7 @@ void drawMissiles() {
       missiles.get(i).move();
     }
     
-    missiles.get(i).draw(meteors, satellites, gamestate);
+    missiles.get(i).draw(meteors, smartMeteors, satellites, gamestate);
   }
 }
 
@@ -324,7 +325,7 @@ void drawMeteors() {
 
     meteors.get(i).move();
     
-    meteors.get(i).draw(meteors, i);
+    meteors.get(i).draw(meteors, smartMeteors, satellites, i, gamestate);
   }
 }
 
@@ -336,18 +337,17 @@ void drawSmartMeteors() {
 
     smartMeteors.get(i).move();
     
-    smartMeteors.get(i).draw(meteors, i);
+    smartMeteors.get(i).draw(meteors, smartMeteors, satellites, i, gamestate);
   }
 }
 
 void drawSatellites() {
-  for (int i = 0; i < MAX_SATELLITES_PER_WAVE; i++) {
-    if (satellites[i] != null) {
-      satellites[i].move();
-      satellites[i].draw(meteors, gamestate);
-      if (satellites[i].attemptToFire()) {
-        satellites[i].fire(meteors, meteorImg);
-      }
+  for (int i = 0; i < satellites.size(); i++) {
+    Satellite current = satellites.get(i);
+    current.move();
+    current.draw(meteors, gamestate);
+    if (current.attemptToFire()) {
+      current.fire(meteors, meteorImg);
     }
   }
 }
@@ -389,7 +389,6 @@ void initialiseMeteors() {
       if (willSplit) {
         val = random(0, height-500);
         m.setSplitHeight(val);
-        System.out.println(val);
       }
     }
 
@@ -418,17 +417,16 @@ void initialiseSmartMeteors() {
 }
 
 void initialiseSatellites() {
-  // TODO: change to be random numb
-  int numbSatellitesInWave = 1;
+  int numbSatellitesInWave = (int) random(0, MAX_SATELLITES_PER_WAVE);
   for (int i = 0; i < numbSatellitesInWave; i++) {
-    int xOffScreen = (int) random(0, 400);
+    int xOffScreen = (int) random(0, MAX_SATELLITE_OFF_SCREEN);
     int startXPos = xOffScreen * -1;
     // start in top half of screen
     int startYPos = (int) random(0, height/2);
 
     Satellite s = new Satellite(startXPos, startYPos);
 
-    satellites[i] = s;
+    satellites.add(s);
   }
 }
 

@@ -1,4 +1,4 @@
-class Meteor extends Explodable implements Collidable {
+class Meteor extends Explodable {
 
     // CONSTANTS
     float METEOR_RADIUS = 20;
@@ -107,7 +107,6 @@ class Meteor extends Explodable implements Collidable {
         // force acts parallel (and opposite) to the direction of travel
         // magnitude of force is also dependent on the current speed
 
-        // TODO: mess with drag coefficients to make it fun for meteors
         PVector drag = velocity.copy().mult(-1 * dragForce * DRAG_STRENGTH);
 
         velocity.y += drag.y;
@@ -131,12 +130,22 @@ class Meteor extends Explodable implements Collidable {
         trail[0] = position.copy();
     }
 
-    public void draw(ArrayList<Meteor> meteors, int thisIndex) {
+    public void draw(ArrayList<Meteor> meteors, ArrayList<SmartMeteor> smartMeteors, ArrayList<Satellite> satellites, int thisIndex, GameState gamestate) {
         if (exploded) {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
                 // blow up any other meteors this explosion impacts
-                checkMeteorsAndDestroyImpacted(meteors, thisIndex);
+                int numbBlownUp = checkObjectAndDestroyImpacted(meteors, thisIndex);
+
+                gamestate.updateScore(numbBlownUp);
+
+                numbBlownUp = checkSmartMeteors(smartMeteors);
+
+                gamestate.updateScoreSM(numbBlownUp);
+
+                numbBlownUp = checkObjectAndDestroyImpacted(satellites, -1);
+
+                gamestate.updateScoreSatellite(numbBlownUp);
             }
 
             return;
@@ -183,12 +192,6 @@ class Meteor extends Explodable implements Collidable {
         return position.y >= floorCollisionPosition;
     }
 
-    boolean inImpactArea(PVector missilePos, float radius) {
-        // if in circle around missilePos of explosion Radius then destroy it
-        float distance = missilePos.dist(position);
-        return distance < radius;
-    }
-
     void checkCities(City[] cities) {
         for (int i = 0; i < cities.length; i++) {
             if (cities[i].inImpactArea(position, EXPLOSION_RADIUS)) {
@@ -205,31 +208,18 @@ class Meteor extends Explodable implements Collidable {
         }
     }
 
-    int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors, int thisIndex) {
-        // TODO: only check those on screen for collision
-        int numbBlownUp = 0;
-        for (int i = 0; i < meteors.size(); i++) {
-            // skip self
-            if (i == thisIndex) continue;
+    int checkSmartMeteors(ArrayList<SmartMeteor> smartMeteors) {
+        int result = checkObjectAndDestroyImpacted(smartMeteors, -1);
 
-            Meteor current = meteors.get(i);
-            // comparisons cheaper than calculating distance
-            // better to check OS than to calc distance
-            boolean onScreen = current.position.x > 0 &&
-                current.position.x < width &&
-                current.position.y > 0;
-
-            if (onScreen &&
-                !meteors.get(i).isExploded() &&
-                meteors.get(i).inImpactArea(position, explosionCurrentRadius)
-            ) {
-                meteors.get(i).explode();
-                numbBlownUp++;
+        for (SmartMeteor current: smartMeteors) {
+            if (current.willCollideExplosion(EXPLOSION_RADIUS, explosionPosition)) {
+                current.changeCourseToAvoid(EXPLOSION_RADIUS, explosionPosition);
             }
         }
 
-        return numbBlownUp;
+        return result;
     }
+    
 
     // code for splitting
     void setWillSplit(boolean willSplit) {

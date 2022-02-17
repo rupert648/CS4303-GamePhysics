@@ -31,7 +31,6 @@ final class SmartMeteor extends Meteor {
     }
 
     public void changeCourseToAvoid(float radius, PVector explosionPos) {
-        System.out.println("calling this!");
         // add velocity in opposite direction from explosion point
         PVector dirFromExp = new PVector(position.x - explosionPos.x, position.y - explosionPos.y);
         dirFromExp.normalize().mult(0.1);
@@ -48,7 +47,6 @@ final class SmartMeteor extends Meteor {
         // force acts parallel (and opposite) to the direction of travel
         // magnitude of force is also dependent on the current speed
 
-        // TODO: mess with drag coefficients to make it fun for meteors
         PVector drag = velocityCopy.copy().mult(-1 * dragForce * DRAG_STRENGTH);
 
         velocityCopy.y += drag.y;

@@ -1,4 +1,4 @@
-final class Ballista implements Collidable {
+final class Ballista extends Explodable {
   // constants
   final int BALLISTA_SIZE = 30;
 
@@ -6,16 +6,14 @@ final class Ballista implements Collidable {
   PImage base;
   PImage main;
 
-  PVector position;
   int ammo;
   boolean disabled;
   
   public Ballista(int x, int y, int ammo, PImage base, PImage main) {
-    position = new PVector(x, y);
+
+    super.position = new PVector(x, y);
     this.ammo = ammo;
     disabled = false;
-
-
     this.base = base;
     this.main = main;
   }
@@ -57,13 +55,6 @@ final class Ballista implements Collidable {
 
   public void setAmmo(int amount) {
     ammo = amount;
-  }
-
-  boolean inImpactArea(PVector meteorPos, float explosionRadius) {
-    // if in circle around missilePos of explosion Radius then destroy it
-
-    float distance = meteorPos.dist(position);
-    return distance < explosionRadius;
   }
 
   void disable() {

@@ -26,6 +26,28 @@ class Explodable {
     public void setExplosionLocation() {
         explosionPosition = position.copy();
     }
+
+    int checkObjectAndDestroyImpacted(ArrayList<? extends Explodable> explodableList, int skipIndex) {
+        int numbBlownUp = 0;
+        for (int i = 0; i < explodableList.size(); i++) {
+            Explodable current = explodableList.get(i);
+
+            boolean onScreen = current.position.x > 0 &&
+                current.position.x < width &&
+                current.position.y > 0;
+
+            if (onScreen &&
+                !current.isExploded() &&
+                // have to hit within the inner half of the explosion
+                current.inImpactArea(position, explosionCurrentRadius)) {
+                    current.explode();
+                    numbBlownUp++;
+                    break;
+                }
+        }
+
+        return numbBlownUp;
+    }
     
     // getters
     public int getX() {return (int) position.x ;}
@@ -35,5 +57,11 @@ class Explodable {
     public void explode() {
         exploded = true;
         setExplosionLocation();
+    }
+
+    boolean inImpactArea(PVector meteorPos, float explosionRadius) {
+        // if in circle around missilePos of explosion Radius then destroy it
+        float distance = meteorPos.dist(position);
+        return distance < explosionRadius;
     }
 }

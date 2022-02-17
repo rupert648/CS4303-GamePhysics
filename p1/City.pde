@@ -1,13 +1,12 @@
-final class City implements Collidable {
+final class City extends Explodable {
   // constants
   final int CITY_SIZE = 50;
 
-  PVector position;
   boolean destroyed = false;
   PImage city;
 
   public City(int x, int y, PImage city) {
-    position = new PVector(x,y);
+    super.position = new PVector(x,y);
 
     this.city = city;
   }
@@ -21,12 +20,5 @@ final class City implements Collidable {
 
   public void destroy() {
     destroyed = true;
-  }
-
-  boolean inImpactArea(PVector meteorPos, float explosionRadius) {
-    // if in circle around missilePos of explosion Radius then destroy it
-
-    float distance = meteorPos.dist(position);
-    return distance < explosionRadius;
   }
 }

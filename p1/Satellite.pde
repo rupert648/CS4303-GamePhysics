@@ -1,4 +1,4 @@
-final class Satellite extends Explodable implements Collidable {
+final class Satellite extends Explodable {
     final int HORIZONTAL_VEL = 1;
     final int SAT_LENGTH = 50;
     final int SAT_HEIGHT = 25;
@@ -15,7 +15,8 @@ final class Satellite extends Explodable implements Collidable {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
                 // blow up any other meteors this explosion impacts
-                int numbBlownUp = checkMeteorsAndDestroyImpacted(meteors);
+                // TODO: expand to check smartMeteors
+                int numbBlownUp = checkObjectAndDestroyImpacted(meteors, -1);
 
                 gamestate.updateScore(numbBlownUp);
             }
@@ -52,34 +53,5 @@ final class Satellite extends Explodable implements Collidable {
         newMeteor.specifyInitialSpeed(initialVelocity);
 
         meteors.add(newMeteor);
-    }
-
-    int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
-        int numbBlownUp = 0;
-        for (int i = 0; i < meteors.size(); i++) {
-            Meteor current = meteors.get(i);
-            // comparisons cheaper than calculating distance
-            // better to check OS than to calc distance
-            boolean onScreen = current.position.x > 0 &&
-                current.position.x < width &&
-                current.position.y > 0;
-
-            if (onScreen &&
-                !meteors.get(i).isExploded() &&
-                meteors.get(i).inImpactArea(position, explosionCurrentRadius)
-            ) {
-                meteors.get(i).explode();
-                numbBlownUp++;
-            }
-        }
-
-        return numbBlownUp;
-    }
-
-
-    boolean inImpactArea(PVector missilePos, float explosionRadius) {
-        // if in circle around missilePos of explosion Radius then destroy it
-        float distance = missilePos.dist(position);
-        return distance < explosionRadius;
     }
 }

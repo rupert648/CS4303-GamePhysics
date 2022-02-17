@@ -44,19 +44,21 @@ final class Missile extends Explodable {
     velocity = velocity.mult(speedIncrease);
   }
   
-  void draw(ArrayList<Meteor> meteors, Satellite[] satellites, GameState gamestate) {
+  void draw(ArrayList<Meteor> meteors, ArrayList<SmartMeteor> smartMeteors, ArrayList<Satellite> satellites,  GameState gamestate) {
     if (exploded) {
       if (!explosionAnimationCompleted) {
         drawExplosion();
-        int numbBlownUp = checkMeteorsAndDestroyImpacted(meteors);
+        int numbBlownUp = checkObjectAndDestroyImpacted(meteors, -1);
 
         gamestate.updateScore(numbBlownUp);
 
-        // TODO: add check for smart meteors
-        checkSmartMeteors(smartMeteors);
+        numbBlownUp = checkSmartMeteors(smartMeteors);
 
-        // TODO: add score for these
-        checkSatellitesAndDestroyImpacted(satellites);
+        gamestate.updateScoreSM(numbBlownUp);
+
+        numbBlownUp = checkObjectAndDestroyImpacted(satellites, -1);
+
+        gamestate.updateScoreSatellite(numbBlownUp);
       }
 
       return;
@@ -141,82 +143,40 @@ final class Missile extends Explodable {
     // reverse velocity
     velocity.x = velocity.x * -1;
   }
+
+  int checkSmartMeteors(ArrayList<SmartMeteor> smartMeteors) {
+    int result = checkObjectAndDestroyImpacted(smartMeteors, -1);
+
+    for (SmartMeteor current: smartMeteors) {
+      if (current.willCollideExplosion(EXPLOSION_RADIUS, explosionPosition)) {
+          current.changeCourseToAvoid(EXPLOSION_RADIUS, explosionPosition);
+      }
+    }
+
+    return result;
+  }
   
-    void computeFriction(Floor floor) {
-        if (velocity.x == 0) return;
-        // if velocity very low stop ball
-        // prevents weird mechanics
-        else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
-        else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
-        // friction force constant no matter mass
-        // proportional to frictional constant of floor
-        
-        // acceleration is in opposite direction to x velocity
-        float a = floor.getMu();
-        // change in velocity = a * some time difference
-        float accelTime = 0.1;
-        float vDiff = accelTime * a;
-        
-        if (velocity.x < 0) {
-        velocity.x += vDiff;
-        } else {
-        velocity.x -= vDiff;
-        }
-        
-    }
+  void computeFriction(Floor floor) {
+      if (velocity.x == 0) return;
+      // if velocity very low stop ball
+      // prevents weird mechanics
+      else if (velocity.x < 0.05 && velocity.x > 0) { velocity.x = 0; return; }
+      else if (velocity.x > -0.05 && velocity.x < 0) { velocity.x = 0; return; }
+      // friction force constant no matter mass
+      // proportional to frictional constant of floor
+      
+      // acceleration is in opposite direction to x velocity
+      float a = floor.getMu();
+      // change in velocity = a * some time difference
+      float accelTime = 0.1;
+      float vDiff = accelTime * a;
+      
+      if (velocity.x < 0) {
+      velocity.x += vDiff;
+      } else {
+      velocity.x -= vDiff;
+      }
+      
+  }
 
-    int checkMeteorsAndDestroyImpacted(ArrayList<Meteor> meteors) {
-        // TODO: only check those on screen for collision
-        int numbBlownUp = 0;
-        for (int i = 0; i < meteors.size(); i++) {
-            Meteor current = meteors.get(i);
-            // comparisons cheaper than calculating distance
-            // better to check OS than to calc distance
-            boolean onScreen = current.position.x > 0 &&
-                current.position.x < width &&
-                current.position.y > 0;
-
-            if (onScreen &&
-                !current.isExploded() &&
-                current.inImpactArea(position, explosionCurrentRadius)
-            ) {
-                current.explode();
-                numbBlownUp++;
-            }
-        }
-
-        return numbBlownUp;
-    }
-
-    void checkSmartMeteors(ArrayList<SmartMeteor> sMeteors) {
-        int numbBlownUp = 0;
-        for (int i = 0; i < sMeteors.size(); i++) {
-            SmartMeteor current = sMeteors.get(i);
-
-            boolean onScreen = current.position.x > 0 &&
-                current.position.x < width &&
-                current.position.y > 0;
-
-            if (onScreen &&
-                !current.isExploded() &&
-                // have to hit within the inner half of the explosion
-                current.inImpactArea(position, EXPLOSION_RADIUS)) {
-                    current.explode();
-                    break;
-                }
-
-            if (current.willCollideExplosion(EXPLOSION_RADIUS, explosionPosition)) {
-                current.changeCourseToAvoid(EXPLOSION_RADIUS, explosionPosition);
-            }
-
-        }
-    }
-
-    void checkSatellitesAndDestroyImpacted(Satellite[] satellites) {
-        for (int i = 0; i < satellites.length; i++) {
-            if (satellites[i] != null && satellites[i].inImpactArea(position, explosionCurrentRadius)) {
-            satellites[i].explode();
-            }
-        }
-    }
 }

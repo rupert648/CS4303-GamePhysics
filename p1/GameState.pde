@@ -1,7 +1,10 @@
 final class GameState {
   // CONSTANTS
-  private int SCORE_INC = 25;
-  private int CITIES_INC = 100;
+  final int METEOR_SCORE_INC = 25;
+  final int SMARTMETEOR_SCORE_INC = 200;
+  final int SATELLITE_SCORE_INC = 100;
+  final int CITIES_INC = 100;
+  final int NEW_CITY_SCORE = 10000;
 
   private int wave;
   private int score;
@@ -44,8 +47,21 @@ final class GameState {
 
   // incrementers
   public void incWave() { wave++; }
+  
   public void updateScore(int numbBlownUp) {
-    int scoreInc = numbBlownUp * SCORE_INC * getWaveMultiplier();
+    int scoreInc = numbBlownUp * METEOR_SCORE_INC * getWaveMultiplier();
+
+    score += scoreInc;
+  }
+
+  public void updateScoreSM(int numbBlownUp) {
+    int scoreInc = numbBlownUp * SMARTMETEOR_SCORE_INC * getWaveMultiplier();
+
+    score += scoreInc;
+  }
+
+  public void updateScoreSatellite(int numbBlownUp) {
+    int scoreInc = numbBlownUp * SATELLITE_SCORE_INC * getWaveMultiplier();
 
     score += scoreInc;
   }
@@ -59,7 +75,7 @@ final class GameState {
   public void checkIfCanAddNewCity(City[] cities) {
     ArrayList<Integer> destroyed = new ArrayList<>();
 
-    if (score > 10000) {
+    if (score > NEW_CITY_SCORE) {
       // can add new city
       for (int i = 0; i < cities.length; i++) {
         if (cities[i].destroyed) {
@@ -67,6 +83,7 @@ final class GameState {
         }
       }
 
+      // only if one is destroyed
       if (destroyed.size() > 0) {
         // get random index
         int r = (int) random(destroyed.size());
