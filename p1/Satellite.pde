@@ -1,13 +1,18 @@
 final class Satellite extends Explodable {
     final int HORIZONTAL_VEL = 1;
-    final int SAT_LENGTH = 50;
-    final int SAT_HEIGHT = 25;
+    final int SAT_LENGTH = 75;
+    final int SAT_HEIGHT = 40;
   
     PVector velocity;
+    PImage image;
 
-    public Satellite(int x, int y) {
-        position = new PVector(x, y);
-        velocity = new PVector(HORIZONTAL_VEL, 0);
+    boolean isSatellite;
+
+    public Satellite(int x, int y, boolean isSatellite, PImage image) {
+        super.position = new PVector(x, y);
+        this.isSatellite = isSatellite;
+        this.velocity = new PVector(isSatellite ? HORIZONTAL_VEL : HORIZONTAL_VEL * -1, 0);
+        this.image = image;
     }
     
     void draw(ArrayList<Meteor> meteors, GameState gamestate) {
@@ -15,7 +20,6 @@ final class Satellite extends Explodable {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
                 // blow up any other meteors this explosion impacts
-                // TODO: expand to check smartMeteors
                 int numbBlownUp = checkObjectAndDestroyImpacted(meteors, -1);
 
                 gamestate.updateScore(numbBlownUp);
@@ -23,11 +27,10 @@ final class Satellite extends Explodable {
 
             return;
         }
-        if (position.x > width) explode();
+        if (isSatellite && position.x > width) explode();
+        else if (!isSatellite && position.x < 0) explode();
 
-        fill(0, 255, 0);
-        rect(position.x, position.y, SAT_LENGTH, SAT_HEIGHT);
-        noFill();
+        image(image, position.x, position.y, SAT_LENGTH, SAT_HEIGHT);
 
         attemptToFire();
     }

@@ -75,6 +75,8 @@ PImage ballistaMain;
 PImage cityImg;
 PImage rocketImg;
 PImage smartMeteorImg;
+PImage satelliteImg;
+PImage bomberImg;
 
 
 // Initialise display and game elements
@@ -418,12 +420,16 @@ void initialiseSmartMeteors() {
 void initialiseSatellites() {
   int numbSatellitesInWave = (int) random(0, MAX_SATELLITES_PER_WAVE);
   for (int i = 0; i < numbSatellitesInWave; i++) {
+
+    int rand = (int) random(0, 2);
+    boolean isSatellite = rand == 0;
+
     int xOffScreen = (int) random(0, MAX_SATELLITE_OFF_SCREEN);
-    int startXPos = xOffScreen * -1;
+    int startXPos = isSatellite ? xOffScreen * -1 : width + xOffScreen;
     // start in top half of screen
     int startYPos = (int) random(0, height/2);
 
-    Satellite s = new Satellite(startXPos, startYPos);
+    Satellite s = new Satellite(startXPos, startYPos, isSatellite, isSatellite ? satelliteImg : bomberImg);
 
     satellites.add(s);
   }
@@ -510,4 +516,6 @@ void loadImages() {
   cityImg = loadImage("../images/city.png");
   rocketImg = loadImage("../images/Rocket.png");
   smartMeteorImg = loadImage("../images/smartMeteor.png");
+  satelliteImg = loadImage("../images/satellite.png");
+  bomberImg = loadImage("../images/bomber.png");
 }
