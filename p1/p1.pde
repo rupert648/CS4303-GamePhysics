@@ -103,7 +103,7 @@ void setup() {
   // initialise cities
   initialiseCities();
 
-  initialiseWave();  
+  initialiseWave();
 }
 
 // update and render
@@ -119,11 +119,7 @@ void draw() {
       nextWave();
     } else {
       textOverlay.draw();
-      floor.draw();
-      drawCities();
-      drawMeteors();
-      drawBallistae();
-      drawSatellites();
+      drawEverything();
     }
 
     return;
@@ -149,9 +145,16 @@ void draw() {
     return;
   }
   
-  // standard wave rendering
+  drawEverything();
+
+  if (blowingUpMissiles) {
+    blowUpMissilesOnScreen();
+  }
+}
+
+void drawEverything() {
   clickLength = System.currentTimeMillis();
-  
+
   hud.draw(
     gamestate.getWave(),
     gamestate.getScore(),
@@ -167,11 +170,6 @@ void draw() {
   drawSmartMeteors();
   drawSatellites();
   drawBallistae();
-
-
-  if (blowingUpMissiles) {
-    blowUpMissilesOnScreen();
-  }
 }
 
 void mousePressed() {
@@ -355,9 +353,10 @@ void drawSatellites() {
 void initialiseWave() {
 
   initialiseMeteors();
-  initialiseSmartMeteors();
-  initialiseSatellites();
-
+  if (gamestate.getWave() > 1) {
+      initialiseSmartMeteors();
+      initialiseSatellites(); 
+  }
 }
 
 void initialiseMeteors() {
@@ -450,10 +449,12 @@ void blowUpMissilesOnScreen() {
 }
 
 boolean waveFinished() {
-  
-  // check all are destroyed
-  for (int i = 0; i < meteors.size(); i++) {
-    Meteor current = meteors.get(i);
+  return allDestroyed(meteors) && allDestroyed(smartMeteors) && allDestroyed(satellites);
+}
+
+boolean allDestroyed(ArrayList<? extends Explodable> explodables) {
+  for (int i = 0; i < explodables.size(); i++) {
+    Explodable current = explodables.get(i);
     if (!current.isExploded()) {
       return false;
     }
@@ -465,6 +466,8 @@ boolean waveFinished() {
 void resetVariables() {
   missiles = new ArrayList<>();
   meteors = new ArrayList<>();
+  smartMeteors = new ArrayList<>();
+  satellites = new ArrayList<>();
   indexToBlowUpTo = 0;
   toBlowUpIndex = 0;
 
