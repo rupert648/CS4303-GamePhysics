@@ -35,7 +35,7 @@ final class SmartMeteor extends Meteor {
         PVector dirFromExp = new PVector(position.x - explosionPos.x, position.y - explosionPos.y);
         dirFromExp.normalize().mult(0.1);
         // often y value is far too high still
-        dirFromExp.y *= 0.1;
+        dirFromExp.y *= 0.5;
 
         velocity.add(dirFromExp);
     }

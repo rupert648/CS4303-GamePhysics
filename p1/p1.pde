@@ -363,7 +363,7 @@ void initialiseWave() {
 
 void initialiseMeteors() {
 
-  int numbMeteorInWave = START_NUMBER_METEOR + (gamestate.getWave() * 5);
+  int numbMeteorInWave = START_NUMBER_METEOR + (gamestate.getWave() * 2);
   for (int i = 0; i < numbMeteorInWave; i++) {
     Random rand = new Random();
 

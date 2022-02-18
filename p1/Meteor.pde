@@ -131,6 +131,9 @@ class Meteor extends Explodable {
     }
 
     public void draw(ArrayList<Meteor> meteors, ArrayList<SmartMeteor> smartMeteors, ArrayList<Satellite> satellites, int thisIndex, GameState gamestate) {
+        // don't draw if above screen
+        if (position.y < -10) return;
+        
         if (exploded) {
             if (!explosionAnimationCompleted) {
                 drawExplosion();
