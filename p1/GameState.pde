@@ -5,6 +5,7 @@ final class GameState {
   final int SATELLITE_SCORE_INC = 100;
   final int CITIES_INC = 100;
   final int NEW_CITY_SCORE = 10000;
+  final int AMMO_INC = 5;
 
   private int wave;
   private int score;
@@ -68,6 +69,12 @@ final class GameState {
 
   public void updateScoreCities(int surviving) {
     int scoreInc = surviving * CITIES_INC * getWaveMultiplier();
+
+    score += scoreInc;
+  }
+
+  public void updateScoreRemainingAmmo(int remaining) {
+    int scoreInc = remaining * AMMO_INC * getWaveMultiplier();
 
     score += scoreInc;
   }

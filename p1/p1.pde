@@ -136,11 +136,12 @@ void draw() {
   }
 
   // perform check every 30 frames
-  if (frameCount % 10 == 0 && waveFinished()) {
+  if (frameCount % 30 == 0 && waveFinished()) {
     textOverlay.setStartTime();
     textOverlay.setText("Wave " + Integer.toString(gamestate.getWave()+2));
     // update score to respect remainining cities
     updateScoreForSurvivingCities();
+    updateScoreForRemainingAmmo();
 
     gamestate.checkIfCanAddNewCity(cities);
 
@@ -507,6 +508,15 @@ void updateScoreForSurvivingCities() {
   }
 
   gamestate.updateScoreCities(surviving);
+}
+
+void updateScoreForRemainingAmmo() {
+  int remaining = 0;
+  for (int i = 0; i < ballistae.length; i++) {
+    remaining += ballistae[i].ammo;
+  }
+
+  gamestate.updateScoreRemainingAmmo(remaining);
 }
 
 void loadImages() {
